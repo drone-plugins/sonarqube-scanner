@@ -1,21 +1,18 @@
-# Harness CIE SonarCube Plugin with Quality Gateway
+# Harness Drone/CIE SonarCube Plugin with Quality Gateway
 
-The plugin of Harness CIE to integrate with SonarQube (previously called Sonar), which is an open source code quality management platform and check the report results for status OK.
+The plugin of Harness Drone/CIE to integrate with SonarQube (previously called Sonar), which is an open source code quality management platform and check the report results for status OK.
 
-![Plugin Configuration](https://github.com/diegopereiraeng/harness-cie-sonarqube-scanner/blob/master/Sonar-CIE.png)
+<img src="https://github.com/drone-plugins/sonarqube-scanner/blob/master/SonarResult.png" alt="Results" width="800"/>
 
-![Results](https://github.com/diegopereiraeng/harness-cie-sonarqube-scanner/blob/master/SonarResult.png)
-
-![Console Results](https://github.com/diegopereiraeng/harness-cie-sonarqube-scanner/blob/master/SonarResultConsole.png)
 
 Detail tutorials: [DOCS.md](DOCS.md).
 
 ### Build process
 build go binary file: 
-`GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o harness-sonar`
+`GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o sonarqube-scanner`
 
 build docker image
-`docker build -t diegokoala/harness-cie-sonarqube-scanner .`
+`docker build -t drone-plugins/sonarqube-scanner .`
 
 
 ### Testing the docker image:
@@ -27,7 +24,7 @@ docker run --rm \
   -e SONAR_TOKEN=60878847cea1a31d817f0deee3daa7868c431433 \
   -e PLUGIN_SONAR_KEY=project-sonar \
   -e PLUGIN_SONAR_NAME=project-sonar \
-  diegokoala/harness-cie-sonarqube-scanner
+  drone-plugins/sonarqube-scanner
 ```
 
 ### Pipeline example
@@ -38,15 +35,15 @@ docker run --rm \
     identifier: Check_Sonar
     spec:
         connectorRef: account.DockerHubDiego
-        image: diegokoala/harness-cie-sonarqube-scanner:master
+        image: drone-plugins/sonarqube-scanner:latest
         privileged: false
         settings:
             sonar_host: http://34.100.11.50
             sonar_token: 60878847cea1a31d817f0deee3daa7868c431433
             sources: "."
             binaries: "."
-            sonar_name: harness-cie-sonarqube-scanner
-            sonar_key: harness-cie-sonarqube-scanner
+            sonar_name: sonarqube-scanner
+            sonar_key: sonarqube-scanner
 - step:
     type: Run
     name: Sonar Show Results
@@ -62,3 +59,7 @@ docker run --rm \
                 paths:
                     - sonarResults.xml
 ```
+
+<img src="https://github.com/drone-plugins/sonarqube-scanner/blob/master/Sonar-CIE.png" alt="Plugin Configuration" width="400"/>
+
+<img src="https://github.com/drone-plugins/sonarqube-scanner/blob/master/SonarResultConsole.png" alt="Console Results" width="800"/>
