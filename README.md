@@ -2,7 +2,7 @@
 
 The plugin of Harness Drone/CIE to integrate with SonarQube (previously called Sonar), which is an open source code quality management platform and check the report results for status OK.
 
-<img src="https://github.com/drone-plugins/sonarqube-scanner/blob/master/SonarResult.png" alt="Results" width="800"/>
+<img src="https://github.com/drone-plugins/sonarqube-scanner/blob/main/SonarResult.png" alt="Results" width="800"/>
 
 
 Detail tutorials: [DOCS.md](DOCS.md).
@@ -60,6 +60,6 @@ docker run --rm \
                     - sonarResults.xml
 ```
 
-<img src="https://github.com/drone-plugins/sonarqube-scanner/blob/master/Sonar-CIE.png" alt="Plugin Configuration" width="400"/>
+<img src="https://github.com/drone-plugins/sonarqube-scanner/blob/main/Sonar-CIE.png" alt="Plugin Configuration" width="400"/>
 
-<img src="https://github.com/drone-plugins/sonarqube-scanner/blob/master/SonarResultConsole.png" alt="Console Results" width="800"/>
+<img src="https://github.com/drone-plugins/sonarqube-scanner/blob/main/SonarResultConsole.png" alt="Console Results" width="800"/>
