@@ -5,7 +5,7 @@ platform:
   arch: amd64
 steps:
 - name: publish
-  image: plugins/docker:18
+  image: plugins/docker:19
   settings:
     auto_tag: true
     auto_tag_suffix: linux-amd64
