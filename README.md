@@ -12,7 +12,7 @@ build go binary file:
 `GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o sonarqube-scanner`
 
 build docker image
-`docker build -t drone-plugins/sonarqube-scanner .`
+`docker build -t plugins/sonarqube-scanner .`
 
 
 ### Testing the docker image:
@@ -24,7 +24,7 @@ docker run --rm \
   -e SONAR_TOKEN=60878847cea1a31d817f0deee3daa7868c431433 \
   -e PLUGIN_SONAR_KEY=project-sonar \
   -e PLUGIN_SONAR_NAME=project-sonar \
-  drone-plugins/sonarqube-scanner
+  plugins/sonarqube-scanner
 ```
 
 ### Pipeline example
@@ -35,7 +35,7 @@ docker run --rm \
     identifier: Check_Sonar
     spec:
         connectorRef: account.DockerHubDiego
-        image: drone-plugins/sonarqube-scanner:latest
+        image: plugins/sonarqube-scanner:linux-amd64
         privileged: false
         settings:
             sonar_host: http://34.100.11.50
