@@ -33,22 +33,22 @@ type (
 		Host  string
 		Token string
 
-		Version                string
-		Branch                 string
-		Sources                string
-		Timeout                string
-		Inclusions             string
-		Exclusions             string
-		Level                  string
-		ShowProfiling          string
-		BranchAnalysis         bool
-		UsingProperties        bool
-		Binaries               string
-		Quality                string
-		QualityEnabled         string
-		QualityTimeout         string
-		ArtifactFile           string
-		CSOpenCoverReportPaths string
+		Version              string
+		Branch               string
+		Sources              string
+		Timeout              string
+		Inclusions           string
+		Exclusions           string
+		Level                string
+		ShowProfiling        string
+		BranchAnalysis       bool
+		UsingProperties      bool
+		Binaries             string
+		Quality              string
+		QualityEnabled       string
+		QualityTimeout       string
+		ArtifactFile         string
+		JavascitptIcovReport string
 	}
 	// SonarReport it is the representation of .scannerwork/report-task.txt //
 	SonarReport struct {
@@ -222,8 +222,8 @@ func (p Plugin) Exec() error {
 		args = append(args, "-Dsonar.qualitygate.wait="+p.Config.QualityEnabled)
 		args = append(args, "-Dsonar.qualitygate.timeout="+p.Config.QualityTimeout)
 	}
-	if len(p.Config.CSOpenCoverReportPaths) >= 1 {
-		args = append(args, "-Dsonar.cs.opencover.reportsPaths="+p.Config.CSOpenCoverReportPaths)
+	if len(p.Config.JavascitptIcovReport) >= 1 {
+		args = append(args, "-Dsonar.javascript.lcov.reportPaths"+p.Config.JavascitptIcovReport)
 	}
 	os.Setenv("SONAR_USER_HOME", ".sonar")
 
