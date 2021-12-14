@@ -223,7 +223,7 @@ func (p Plugin) Exec() error {
 		args = append(args, "-Dsonar.qualitygate.timeout="+p.Config.QualityTimeout)
 	}
 	if len(p.Config.JavascitptIcovReport) >= 1 {
-		args = append(args, "-Dsonar.javascript.lcov.reportPaths"+p.Config.JavascitptIcovReport)
+		args = append(args, "-Dsonar.javascript.lcov.reportPaths="+p.Config.JavascitptIcovReport)
 	}
 	os.Setenv("SONAR_USER_HOME", ".sonar")
 
