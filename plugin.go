@@ -235,7 +235,8 @@ func (p Plugin) Exec() error {
 	fmt.Printf("==> Code Analysis Result:\n")
 	err := cmd.Run()
 	if err != nil {
-		return err
+		fmt.Printf("==> Error in Analysis\n")
+		//return err
 	}
 
 	cmd = exec.Command("cat", ".scannerwork/report-task.txt")
