@@ -232,12 +232,13 @@ func (p Plugin) Exec() error {
 	cmd := exec.Command("sonar-scanner", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	fmt.Printf("==> Code Analysis Result:\n")
+	fmt.Printf("\n\n==> Sonar Code Analysis Result:\n\n")
 	err := cmd.Run()
 	if err != nil {
-		fmt.Printf("==> Error in Analysis\n")
+		fmt.Printf("\n\n==> Error in Analysis\n\n")
 		//return err
 	}
+	fmt.Printf("\n\nContinuing After Analysis\n\n")
 
 	cmd = exec.Command("cat", ".scannerwork/report-task.txt")
 
