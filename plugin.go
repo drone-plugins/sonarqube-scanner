@@ -228,9 +228,11 @@ func (p Plugin) Exec() error {
 		args = append(args, "-Dsonar.javascript.lcov.reportPaths="+p.Config.JavascitptIcovReport)
 	}
 	if len(p.Config.JacocoReportPath) >= 1 {
+		fmt.Printf("\n\n==> Sonar Java Plugin Jacoco configured!\n\n")
 		args = append(args, "-Dsonar.jacoco.reportPath="+p.Config.JavascitptIcovReport)
 	}
 	if len(p.Config.JavaCoveragePlugin) >= 1 {
+		fmt.Printf("\n\n==> Sonar Java Plugin Jacoco Path configured!\n\n")
 		args = append(args, "-Dsonar.java.coveragePlugin="+p.Config.JavascitptIcovReport)
 	}
 
