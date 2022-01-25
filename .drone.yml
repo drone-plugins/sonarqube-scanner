@@ -20,7 +20,7 @@ steps:
     event:
       exclude:
       - pull_request
-- name: publish
+- name: publish-v1.0.1
   image: plugins/docker:18
   settings:
     auto_tag: true
