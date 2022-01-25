@@ -49,6 +49,8 @@ type (
 		QualityTimeout       string
 		ArtifactFile         string
 		JavascitptIcovReport string
+		JavaCoveragePlugin   string
+		JacocoReportPath     string
 	}
 	// SonarReport it is the representation of .scannerwork/report-task.txt //
 	SonarReport struct {
@@ -225,6 +227,13 @@ func (p Plugin) Exec() error {
 	if len(p.Config.JavascitptIcovReport) >= 1 {
 		args = append(args, "-Dsonar.javascript.lcov.reportPaths="+p.Config.JavascitptIcovReport)
 	}
+	if len(p.Config.JacocoReportPath) >= 1 {
+		args = append(args, "-Dsonar.jacoco.reportPath="+p.Config.JavascitptIcovReport)
+	}
+	if len(p.Config.JavaCoveragePlugin) >= 1 {
+		args = append(args, "-Dsonar.java.coveragePlugin="+p.Config.JavascitptIcovReport)
+	}
+
 	os.Setenv("SONAR_USER_HOME", ".sonar")
 
 	fmt.Printf("sonar-scanner")
