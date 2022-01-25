@@ -126,16 +126,16 @@ func main() {
 			EnvVar: "PLUGIN_JAVASCRIPT_ICOV_REPORTPATH",
 		},
 		cli.StringFlag{
-			Name:   "java_coveragePlugin",
+			Name:   "java_coverage_plugin",
 			Usage:  "Sonar Java Plugin parameter",
 			Value:  "",
-			EnvVar: "PLUGIN_JAVASCRIPT_ICOV_REPORTPATH",
+			EnvVar: "PLUGIN_JAVA_COVERAGE_PLUGIN",
 		},
 		cli.StringFlag{
-			Name:   "jacoco_reportPath",
+			Name:   "jacoco_report_path",
 			Usage:  "Sonar Javascript Jacoco Report Path parameter",
 			Value:  "",
-			EnvVar: "PLUGIN_JAVASCRIPT_ICOV_REPORTPATH",
+			EnvVar: "PLUGIN_JACOCO_REPORT_PATH",
 		},
 	}
 	app.Run(os.Args)
@@ -163,8 +163,8 @@ func run(c *cli.Context) {
 			ArtifactFile:         c.String("artifact_file"),
 			QualityTimeout:       c.String("qualitygate_timeout"),
 			JavascitptIcovReport: c.String("javascript_icov_reportPath"),
-			JavaCoveragePlugin:   c.String("java_coveragePlugin"),
-			JacocoReportPath:     c.String("jacoco_reportPath"),
+			JavaCoveragePlugin:   c.String("java_coverage_plugin"),
+			JacocoReportPath:     c.String("jacoco_report_path"),
 		},
 	}
 	os.Setenv("TOKEN", base64.StdEncoding.EncodeToString([]byte(c.String("token")+":")))
