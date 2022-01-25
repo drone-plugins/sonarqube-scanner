@@ -20,6 +20,22 @@ steps:
     event:
       exclude:
       - pull_request
+- name: publish
+  image: plugins/docker:18
+  settings:
+    auto_tag: true
+    auto_tag_suffix: v1.0.1
+    daemon_off: false
+    dockerfile: Dockerfile
+    password:
+      from_secret: docker_password
+    repo: plugins/sonarqube-scanner
+    username:
+      from_secret: docker_username
+  when:
+    event:
+      exclude:
+      - pull_request
 trigger:
   event:
   - push
