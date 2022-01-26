@@ -63,7 +63,7 @@ Safety first, the host and token are stored in Drone Secrets.
 * `branch`: Branch for analysis.
 * `build_number`: Build Version.
 
-* `ver`: Code version, Default value `DRONE_BUILD_NUMBER`.
+* `build_version`: Code version, Default value `DRONE_BUILD_NUMBER`.
 * `timeout`: Default seconds `60`.
 * `sources`: Comma-separated paths to directories containing source files. 
 * `inclusions`: Comma-delimited list of file path patterns to be included in analysis. When set, only files matching the paths set here will be included in analysis.
