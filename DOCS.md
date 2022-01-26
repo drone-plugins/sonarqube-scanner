@@ -36,7 +36,7 @@ Customized parameters could be specified:
         from_secret: sonar_token
       sonar_name: project-harness
       sonar_key: project-harness
-+     ver: 1.0
++     build_number: 1.0
 +     timeout: 20
 +     sources: .
 +     level: DEBUG
