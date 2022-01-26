@@ -229,7 +229,7 @@ func (p Plugin) Exec() error {
 	}
 	if len(p.Config.JacocoReportPath) >= 1 {
 		fmt.Printf("\n\n==> Sonar Java Plugin Jacoco configured!\n\n")
-		args = append(args, "-Dsonar.coverage.jacoco.xmlReportPaths="+p.Config.JacocoReportPath)
+		args = append(args, "-Dsonar.jacoco.reportPath="+p.Config.JacocoReportPath)
 	}
 	if len(p.Config.JavaCoveragePlugin) >= 1 {
 		fmt.Printf("\n\n==> Sonar Java Plugin Jacoco Path configured!\n\n")
