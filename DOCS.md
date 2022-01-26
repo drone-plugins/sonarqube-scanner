@@ -36,7 +36,7 @@ Customized parameters could be specified:
         from_secret: sonar_token
       sonar_name: project-harness
       sonar_key: project-harness
-+     ver: 1.0
++     build_number: 1.0
 +     timeout: 20
 +     sources: .
 +     level: DEBUG
@@ -60,10 +60,10 @@ Safety first, the host and token are stored in Drone Secrets.
 * `sonar_qualitygate_timeout`: Timeout in seconds for Sonar Scan.
 * `artifact_file`: Timeout in seconds for Sonar Scan.
 * `sonar_quality_enabled`: True to block pipeline if sonar quality gate conditions are not met.
-* `branch`: Branch for analysis.
+* `branch`: Branch for analysis. (-Dsonar.branch.name=)
 * `build_number`: Build Version.
 
-* `ver`: Code version, Default value `DRONE_BUILD_NUMBER`.
+* `build_version`: Code version, Default value `DRONE_BUILD_NUMBER`.
 * `timeout`: Default seconds `60`.
 * `sources`: Comma-separated paths to directories containing source files. 
 * `inclusions`: Comma-delimited list of file path patterns to be included in analysis. When set, only files matching the paths set here will be included in analysis.
@@ -71,21 +71,29 @@ Safety first, the host and token are stored in Drone Secrets.
 * `level`: Control the quantity / level of logs produced during an analysis. Default value `INFO`. 
     * DEBUG: Display INFO logs + more details at DEBUG level.
     * TRACE: Display DEBUG logs + the timings of all ElasticSearch queries and Web API calls executed by the SonarQube Scanner.
-* `showProfiling`: Display logs to see where the analyzer spends time. Default value `false`
+* `showProfiling`: Display logs to see where the analyzer spends time. Default value `false` (-Dsonar.showProfiling=)
 * `branchAnalysis`: Pass currently analysed branch to SonarQube. (Must not be active for initial scan!) Default value `false`
 
 
 * `usingProperties`: Using the `sonar-project.properties` file in root directory as sonar parameters. (Not include `sonar_host` and
 `sonar_token`.) Default value `false`
 
+* `sonar_qualitygate_timeout`: Quality gate timeout. (-Dsonar.qualitygate.timeout=)
 
-
-
+* `binaries`: app binaries (-Dsonar.java.binaries=)
 
 
 # Javascript Parameters
 
 * `javascript_icov_reportPath`: Path to coverage report (-Dsonar.javascript.lcov.reportPath)
+
+
+# Java Parameters
+
+* `jacoco_report_path`: Path to Jacoco Report (if not default). (-Dsonar.jacoco.reportPath=)
+
+* `java_coverage_plugin`: plugin to use as coverage. ex: jacoco (-Dsonar.java.coveragePlugin=)
+
 
 # Notes
 
