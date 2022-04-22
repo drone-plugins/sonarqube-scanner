@@ -2,14 +2,11 @@
 github.com/cpuguy83/go-md2man/v2/md2man
 # github.com/drone/drone-kaniko v1.2.0
 ## explicit
-github.com/drone/drone-kaniko/cmd/artifact
 # github.com/konsorten/go-windows-terminal-sequences v1.0.1
 ## explicit
-# github.com/pelletier/go-toml v1.9.4
+# github.com/pelletier/go-toml v1.9.5
 ## explicit
 github.com/pelletier/go-toml
-# github.com/pkg/errors v0.9.1
-github.com/pkg/errors
 # github.com/russross/blackfriday/v2 v2.0.1
 github.com/russross/blackfriday/v2
 # github.com/shurcooL/sanitized_anchor_name v1.0.0
