@@ -14,7 +14,7 @@ RUN go get github.com/urfave/cli
 RUN GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o harness-sonar
 RUN npm update
 
-FROM openjdk:11.0.13-jre
+FROM openjdk:11.0.15-jre
 
 ARG SONAR_VERSION=4.5.0.2216
 ARG SONAR_SCANNER_CLI=sonar-scanner-cli-${SONAR_VERSION}
