@@ -4,6 +4,16 @@ platform:
   os: linux
   arch: amd64
 steps:
+- name: pr test
+  image: plugins/docker:18
+  settings:
+    daemon_off: false
+    dockerfile: Dockerfile
+    repo: plugins/sonarqube-scanner
+    dry_run: true
+  when:
+    event:
+      - pull_request
 - name: publish
   image: plugins/docker:18
   settings:
