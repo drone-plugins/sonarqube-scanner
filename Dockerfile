@@ -12,7 +12,6 @@ RUN go get github.com/sirupsen/logrus
 RUN go get github.com/pelletier/go-toml/cmd/tomll
 RUN go get github.com/urfave/cli
 RUN GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o harness-sonar
-RUN npm update
 
 FROM openjdk:11.0.15-jre
 
