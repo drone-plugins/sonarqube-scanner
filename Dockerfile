@@ -14,7 +14,7 @@ RUN GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o harness-sonar
 
 FROM openjdk:11.0.16-jre
 
-ARG SONAR_VERSION=4.5.0.2216
+ARG SONAR_VERSION=4.7.0.2747
 ARG SONAR_SCANNER_CLI=sonar-scanner-cli-${SONAR_VERSION}
 ARG SONAR_SCANNER=sonar-scanner-${SONAR_VERSION}
 
