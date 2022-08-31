@@ -60,6 +60,44 @@ docker run --rm \
                     - sonarResults.xml
 ```
 
+### Full config step Example - (thanks @Ryan Nelson)
+
+```yaml
+type: Plugin
+spec:
+    connectorRef: <+input>
+    image: plugins/sonarqube-scanner:linux-amd64
+    reports:
+        type: JUnit
+        spec:
+            paths:
+                - "**/**/*.xml"
+    settings:
+        sonar_key: <+input>
+        sonar_name: <+input>
+        sonar_host: <+input>
+        sonar_token: <+input>
+        build_number: <+input>
+        branch: <+codebase.branch>
+        timeout: <+input>
+        sources: .
+        inclusions: <+input>
+        exclusions: <+input>
+        level: <+input>
+        showprofiling: <+input>.allowedValues("true","false"
+        branchanalysis: <+input>.allowedValues("true","false")
+        usingproperties: <+input>.allowedValues("true","false")
+        binaries: <+input>
+        sonar_qualitygate: OK
+        sonar_quality_enabled: <+input>.allowedValues("true","false")
+        sonar_qualitygate_timeout: <+input>
+        artifact_file: <+input>
+        javascript_icov_reportpath: <+input>
+        java_coverage_plugin: <+input>
+        jacoco_report_path: <+input>
+        
+```
+
 <img src="https://github.com/drone-plugins/sonarqube-scanner/blob/main/Sonar-CIE.png" alt="Plugin Configuration" width="400"/>
 
 <img src="https://github.com/drone-plugins/sonarqube-scanner/blob/main/SonarResultConsole.png" alt="Console Results" width="800"/>
