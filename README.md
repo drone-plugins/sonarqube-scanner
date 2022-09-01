@@ -1,4 +1,4 @@
-# Harness Drone/CIE SonarQube Plugin with Quality Gateway
+# Harness Drone/CIE SonarQube Plugin with Quality Gate
 
 The plugin of Harness Drone/CIE to integrate with SonarQube (previously called Sonar), which is an open source code quality management platform and check the report results for status OK.
 
