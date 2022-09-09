@@ -137,6 +137,14 @@ func main() {
 			Value:  "",
 			EnvVar: "PLUGIN_JACOCO_REPORT_PATH",
 		},
+		cli.StringFlag{
+			Name:   "ssl_keystore_pwd",
+			Usage:  "Java Keystore Password",
+			Value:  "",
+			EnvVar: "PLUGIN_JAVA_KEYSTORE_PWD",
+		},
+		
+		
 	}
 	app.Run(os.Args)
 }
@@ -165,6 +173,7 @@ func run(c *cli.Context) {
 			JavascitptIcovReport: c.String("javascript_icov_reportPath"),
 			JavaCoveragePlugin:   c.String("java_coverage_plugin"),
 			JacocoReportPath:     c.String("jacoco_report_path"),
+			SSLKeyStorePassword:  c.String("ssl_keystore_pwd"),
 		},
 	}
 	os.Setenv("TOKEN", base64.StdEncoding.EncodeToString([]byte(c.String("token")+":")))
