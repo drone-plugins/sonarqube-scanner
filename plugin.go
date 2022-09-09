@@ -51,6 +51,7 @@ type (
 		JavascitptIcovReport string
 		JavaCoveragePlugin   string
 		JacocoReportPath     string
+		SSLKeyStorePassword  string
 	}
 	// SonarReport it is the representation of .scannerwork/report-task.txt //
 	SonarReport struct {
@@ -235,6 +236,12 @@ func (p Plugin) Exec() error {
 		fmt.Printf("\n\n==> Sonar Java Plugin Jacoco Path configured!\n\n")
 		args = append(args, "-Dsonar.java.coveragePlugin="+p.Config.JavaCoveragePlugin)
 	}
+	
+	if len(p.Config.SSLKeyStorePassword) >= 1 {
+		args = append(args, "-Djavax.net.ssl.trustStorePassword="+p.Config.SSLKeyStorePassword)
+	}
+	
+	
 
 	os.Setenv("SONAR_USER_HOME", ".sonar")
 
