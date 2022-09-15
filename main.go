@@ -143,7 +143,13 @@ func main() {
 			Value:  "",
 			EnvVar: "PLUGIN_JAVA_KEYSTORE_PWD",
 		},
-		
+		cli.StringFlag{
+			Name:   "cacerts_location",
+			Usage:  "Java Truststore Location (cacerts)",
+			Value:  "",
+			EnvVar: "PLUGIN_CACERTS_LOCATION",
+		},
+
 		
 	}
 	app.Run(os.Args)
@@ -174,6 +180,7 @@ func run(c *cli.Context) {
 			JavaCoveragePlugin:   c.String("java_coverage_plugin"),
 			JacocoReportPath:     c.String("jacoco_report_path"),
 			SSLKeyStorePassword:  c.String("ssl_keystore_pwd"),
+			CacertsLocation:      c.String("cacerts_location"),
 		},
 	}
 	os.Setenv("TOKEN", base64.StdEncoding.EncodeToString([]byte(c.String("token")+":")))
