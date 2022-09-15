@@ -52,6 +52,7 @@ type (
 		JavaCoveragePlugin   string
 		JacocoReportPath     string
 		SSLKeyStorePassword  string
+		CacertsLocation	     string
 	}
 	// SonarReport it is the representation of .scannerwork/report-task.txt //
 	SonarReport struct {
@@ -239,6 +240,10 @@ func (p Plugin) Exec() error {
 	
 	if len(p.Config.SSLKeyStorePassword) >= 1 {
 		args = append(args, "-Djavax.net.ssl.trustStorePassword="+p.Config.SSLKeyStorePassword)
+	}
+	
+	if len(p.Config.CacertsLocation) >= 1 {
+		args = append(args, "-Djavax.net.ssl.trustStore="+p.Config.CacertsLocation)
 	}
 	
 	
