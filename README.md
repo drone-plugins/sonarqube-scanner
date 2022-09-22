@@ -36,6 +36,11 @@ docker run --rm \
     spec:
         connectorRef: account.DockerHubDiego
         image: plugins/sonarqube-scanner:linux-amd64
+        reports:
+            type: JUnit
+            spec:
+                paths:
+                    - "**/**/*.xml"
         privileged: false
         settings:
             sonar_host: http://34.100.11.50
@@ -44,20 +49,6 @@ docker run --rm \
             binaries: "."
             sonar_name: sonarqube-scanner
             sonar_key: sonarqube-scanner
-- step:
-    type: Run
-    name: Sonar Show Results
-    identifier: Sonar_Results
-    spec:
-        connectorRef: account.DockerHubDiego
-        image: maven:3.6.3-jdk-8
-        command: ls sonarResults.xml
-        privileged: false
-        reports:
-            type: JUnit
-            spec:
-                paths:
-                    - sonarResults.xml
 ```
 
 ### Full config step Example - (thanks @Ryan Nelson)
