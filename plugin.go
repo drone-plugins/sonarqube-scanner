@@ -269,7 +269,9 @@ func (p Plugin) Exec() error {
 	cmd.Stdout = os.Stdout
 
 	cmd.Stderr = os.Stderr
+	fmt.Printf("#######################################\n")
 	fmt.Printf("==> Report Result:\n")
+	fmt.Printf("#######################################\n")
 	err = cmd.Run()
 
 	if err != nil {
@@ -297,6 +299,12 @@ func (p Plugin) Exec() error {
 		}).Fatal("Unable to get Job state")
 		return err
 	}
+	
+	fmt.Printf("\n")
+	fmt.Printf("#######################################\n")
+	fmt.Printf("Waiting for quality gate validation...\n")
+	fmt.Printf("#######################################\n")
+	fmt.Printf("\n")
 
 	status := getStatus(task, report)
 
