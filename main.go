@@ -149,6 +149,30 @@ func main() {
 			Value:  "",
 			EnvVar: "PLUGIN_CACERTS_LOCATION",
 		},
+		cli.StringFlag{
+			Name:   "junit_reportpaths",
+			Usage:  "JUnit Report Paths",
+			Value:  "",
+			EnvVar: "PLUGIN_JUNIT_REPORTPATHS",
+		},
+		cli.StringFlag{
+			Name:   "source_encoding",
+			Usage:  "Source Encoding",
+			Value:  "",
+			EnvVar: "PLUGIN_SOURCE_ENCODING",
+		},
+		cli.StringFlag{
+			Name:   "tests",
+			Usage:  "Sonar Tests",
+			Value:  "",
+			EnvVar: "PLUGIN_TESTS",
+		},
+		cli.StringFlag{
+			Name:   "java_test",
+			Usage:  "Java Test",
+			Value:  "",
+			EnvVar: "PLUGIN_JAVA_TEST",
+		},
 
 		
 	}
@@ -181,6 +205,10 @@ func run(c *cli.Context) {
 			JacocoReportPath:     c.String("jacoco_report_path"),
 			SSLKeyStorePassword:  c.String("ssl_keystore_pwd"),
 			CacertsLocation:      c.String("cacerts_location"),
+			JunitReportPaths:     c.String("junit_reportpaths"),
+			SourceEncoding:       c.String("source_encoding"),
+			SonarTests:           c.String("tests"),
+			JavaTest:             c.String("java_test"),
 		},
 	}
 	os.Setenv("TOKEN", base64.StdEncoding.EncodeToString([]byte(c.String("token")+":")))
