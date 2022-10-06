@@ -53,6 +53,10 @@ type (
 		JacocoReportPath     string
 		SSLKeyStorePassword  string
 		CacertsLocation	     string
+		JunitReportPaths:    string
+		SourceEncoding:      string
+		SonarTests:          string
+		JavaTest:            string
 	}
 	// SonarReport it is the representation of .scannerwork/report-task.txt //
 	SonarReport struct {
@@ -237,6 +241,18 @@ func (p Plugin) Exec() error {
 	if len(p.Config.JavaCoveragePlugin) >= 1 {
 		args = append(args, "-Dsonar.java.coveragePlugin="+p.Config.JavaCoveragePlugin)
 		fmt.Printf("\n\n==> Sonar Java Plugin Jacoco Path configured!\n\n")
+	}
+	if len(p.Config.JunitReportPaths) >= 1 {
+		args = append(args, "-Dsonar.junit.reportPaths="+p.Config.JunitReportPaths)
+	}
+	if len(p.Config.SourceEncoding) >= 1 {
+		args = append(args, "-Dsonar.sourceEncoding="+p.Config.SourceEncoding)
+	}
+	if len(p.Config.SonarTests) >= 1 {
+		args = append(args, "-Dsonar.tests="+p.Config.SonarTests)
+	}
+	if len(p.Config.JavaTest) >= 1 {
+		args = append(args, "-Dsonar.java.test.binaries="+p.Config.JavaTest)
 	}
 	
 	if len(p.Config.SSLKeyStorePassword) >= 1 {
