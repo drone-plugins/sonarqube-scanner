@@ -53,10 +53,10 @@ type (
 		JacocoReportPath     string
 		SSLKeyStorePassword  string
 		CacertsLocation	     string
-		JunitReportPaths:    string
-		SourceEncoding:      string
-		SonarTests:          string
-		JavaTest:            string
+		JunitReportPaths     string
+		SourceEncoding       string
+		SonarTests           string
+		JavaTest             string
 	}
 	// SonarReport it is the representation of .scannerwork/report-task.txt //
 	SonarReport struct {
