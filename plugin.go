@@ -57,6 +57,10 @@ type (
 		SourceEncoding       string
 		SonarTests           string
 		JavaTest             string
+		PRKey                string
+		PRBranch             string
+		PRBase               string
+		
 	}
 	// SonarReport it is the representation of .scannerwork/report-task.txt //
 	SonarReport struct {
@@ -254,6 +258,27 @@ func (p Plugin) Exec() error {
 	if len(p.Config.JavaTest) >= 1 {
 		args = append(args, "-Dsonar.java.test.binaries="+p.Config.JavaTest)
 	}
+	
+	
+	
+	
+	
+	if len(p.Config.PRKey) >= 1 {
+		args = append(args, "-Dsonar.pullrequest.key="+p.Config.PRKey)
+	}
+	
+	if len(p.Config.PRBranch) >= 1 {
+		args = append(args, "-Dsonar.pullrequest.branch="+p.Config.PRBranch)
+	}
+	
+	if len(p.Config.PRBase) >= 1 {
+		args = append(args, "-Dsonar.pullrequest.base="+p.Config.PRBase)
+	}
+	
+	
+	
+	
+	
 	
 	if len(p.Config.SSLKeyStorePassword) >= 1 {
 		args = append(args, "-Djavax.net.ssl.trustStorePassword="+p.Config.SSLKeyStorePassword)
