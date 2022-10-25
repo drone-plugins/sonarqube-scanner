@@ -173,6 +173,24 @@ func main() {
 			Value:  "",
 			EnvVar: "PLUGIN_JAVA_TEST",
 		},
+		cli.StringFlag{
+			Name:   "pr_key",
+			Usage:  "PR Key",
+			Value:  "",
+			EnvVar: "PLUGIN_PR_KEY",
+		},
+		cli.StringFlag{
+			Name:   "pr_branch",
+			Usage:  "PR Branch",
+			Value:  "",
+			EnvVar: "PLUGIN_PR_BRANCH",
+		},
+		cli.StringFlag{
+			Name:   "pr_base",
+			Usage:  "PR Base",
+			Value:  "",
+			EnvVar: "PLUGIN_PR_BASE",
+		},
 
 		
 	}
@@ -209,6 +227,9 @@ func run(c *cli.Context) {
 			SourceEncoding:       c.String("source_encoding"),
 			SonarTests:           c.String("tests"),
 			JavaTest:             c.String("java_test"),
+			PRKey:                c.String("pr_key"),
+			PRBranch:             c.String("pr_branch"),
+			PRBase:               c.String("pr_base"),
 		},
 	}
 	os.Setenv("TOKEN", base64.StdEncoding.EncodeToString([]byte(c.String("token")+":")))
