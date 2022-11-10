@@ -191,6 +191,12 @@ func main() {
 			Value:  "",
 			EnvVar: "PLUGIN_PR_BASE",
 		},
+		cli.StringFlag{
+			Name:   "coverage_exclusion",
+			Usage:  "sonar.coverage.exclusions",
+			Value:  "",
+			EnvVar: "PLUGIN_COVERAGE_EXCLUSION",
+		},
 
 		
 	}
