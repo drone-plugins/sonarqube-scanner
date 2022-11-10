@@ -236,6 +236,7 @@ func run(c *cli.Context) {
 			PRKey:                c.String("pr_key"),
 			PRBranch:             c.String("pr_branch"),
 			PRBase:               c.String("pr_base"),
+			CoverageExclusion:    c.String("coverage_exclusion"),
 		},
 	}
 	os.Setenv("TOKEN", base64.StdEncoding.EncodeToString([]byte(c.String("token")+":")))
