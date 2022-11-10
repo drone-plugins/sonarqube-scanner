@@ -60,6 +60,7 @@ type (
 		PRKey                string
 		PRBranch             string
 		PRBase               string
+		CoverageExclusion    string   
 		
 	}
 	// SonarReport it is the representation of .scannerwork/report-task.txt //
@@ -258,6 +259,11 @@ func (p Plugin) Exec() error {
 	if len(p.Config.JavaTest) >= 1 {
 		args = append(args, "-Dsonar.java.test.binaries="+p.Config.JavaTest)
 	}
+	
+	if len(p.Config.CoverageExclusion) >= 1 {
+		args = append(args, "-Dsonar.coverage.exclusions="+p.Config.CoverageExclusion)
+	}
+	
 	
 	
 	
