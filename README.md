@@ -5,7 +5,8 @@ The plugin of Harness Drone/CIE to integrate with SonarQube (previously called S
 <img src="https://github.com/drone-plugins/sonarqube-scanner/blob/main/SonarResult.png" alt="Results" width="800"/>
 
 
-Detail tutorials: [DOCS.md](DOCS.md).
+Detail Informations/tutorials Parameteres: [DOCS.md](DOCS.md).
+
 
 ### Build process
 build go binary file: 
