@@ -61,7 +61,12 @@ type (
 		PRBranch             string
 		PRBase               string
 		CoverageExclusion    string   
-		
+		JavaSource           string           
+		JavaLibraries        string    
+		SurefireReportsPath  string
+		TypescriptLcovReportPaths string
+		Verbose              string 
+		CustomJvmParams      string
 	}
 	// SonarReport it is the representation of .scannerwork/report-task.txt //
 	SonarReport struct {
@@ -264,6 +269,31 @@ func (p Plugin) Exec() error {
 		args = append(args, "-Dsonar.coverage.exclusions="+p.Config.CoverageExclusion)
 	}
 	
+	if len(p.Config.JavaSource) >= 1 {
+		args = append(args, "-Dsonar.java.source="+p.Config.JavaSource)
+	}
+	if len(p.Config.JavaLibraries) >= 1 {
+		args = append(args, "-Dsonar.java.libraries="+p.Config.JavaLibraries)
+	}
+	if len(p.Config.SurefireReportsPath) >= 1 {
+		args = append(args, "-Dsonar.surefire.reportsPath="+p.Config.SurefireReportsPath)
+	}
+	if len(p.Config.TypescriptLcovReportPaths) >= 1 {
+		args = append(args, "-Dsonar.sonar.typescript.lcov.reportPaths="+p.Config.TypescriptLcovReportPaths)
+	}
+	if len(p.Config.Verbose) >= 1 {
+		args = append(args, "-Dsonar.verbose="+p.Config.Verbose)
+	}
+
+	if len(p.Config.CustomJvmParams) >= 1 {
+
+		params := strings.Split(p.Config.CustomJvmParams, ",")
+		for i, param := range params {
+			//fmt.Println(i, param)
+			args = append(args, param)
+		}
+		
+	}
 	
 	
 	

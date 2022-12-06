@@ -30,11 +30,11 @@ steps:
     event:
       exclude:
       - pull_request
-- name: publish-v1.0.7
+- name: publish-v1.0.8
   image: plugins/docker:18
   settings:
     auto_tag: true
-    auto_tag_suffix: v1.0.7
+    auto_tag_suffix: v1.0.8
     daemon_off: false
     dockerfile: Dockerfile
     password:

@@ -72,7 +72,7 @@ func main() {
 			Name:   "level",
 			Usage:  "log level",
 			Value:  "INFO",
-			EnvVar: "PLUGIN_LEVEL",
+			EnvVar: "PLUGIN_LEVEL,PLUGIN_SONAR_LEVEL",
 		},
 		cli.StringFlag{
 			Name:   "showProfiling",
@@ -197,7 +197,42 @@ func main() {
 			Value:  "",
 			EnvVar: "PLUGIN_COVERAGE_EXCLUSION",
 		},
-
+		cli.StringFlag{
+			Name:   "java_source",
+			Usage:  "sonar.java.source",
+			Value:  "",
+			EnvVar: "PLUGIN_JAVA_SOURCE",
+		},
+		cli.StringFlag{
+			Name:   "java_libraries",
+			Usage:  "sonar.java.libraries",
+			Value:  "",
+			EnvVar: "PLUGIN_JAVA_LIBRARIES",
+		},
+		cli.StringFlag{
+			Name:   "surefire_reportsPath",
+			Usage:  "sonar.surefire.reportsPath",
+			Value:  "",
+			EnvVar: "PLUGIN_SUREFIRE_REPORTSPATH",
+		},
+		cli.StringFlag{
+			Name:   "typescript_lcov_reportPaths",
+			Usage:  "sonar.typescript.lcov.reportPaths",
+			Value:  "",
+			EnvVar: "PLUGIN_TYPESCRIPT_LCOV_REPORTPATHS",
+		},
+		cli.StringFlag{
+			Name:   "verbose",
+			Usage:  "sonar.verbose",
+			Value:  "",
+			EnvVar: "PLUGIN_VERBOSE",
+		},
+		cli.StringFlag{
+			Name:   "custom_jvm_params",
+			Usage:  "you can pass jvm param directly and use comma for multiples params ex: -Dsonar.java.source='value_you_want'",
+			Value:  "",
+			EnvVar: "PLUGIN_CUSTOM_JVM_PARAMS",
+		},
 		
 	}
 	app.Run(os.Args)
@@ -237,6 +272,12 @@ func run(c *cli.Context) {
 			PRBranch:             c.String("pr_branch"),
 			PRBase:               c.String("pr_base"),
 			CoverageExclusion:    c.String("coverage_exclusion"),
+			JavaSource:           c.String("java_source"),
+			JavaLibraries:        c.String("java_libraries"),
+			SurefireReportsPath:  c.String("surefire_reportsPath"),
+			TypescriptLcovReportPaths:    c.String("typescript_lcov_reportPaths"),
+			Verbose:              c.String("verbose"),
+			CustomJvmParams       c.String("custom_jvm_params"),
 		},
 	}
 	os.Setenv("TOKEN", base64.StdEncoding.EncodeToString([]byte(c.String("token")+":")))
