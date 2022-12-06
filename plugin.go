@@ -28,45 +28,44 @@ var sonarDashStatic = "/dashboard?id="
 
 type (
 	Config struct {
-		Key   string
-		Name  string
-		Host  string
-		Token string
-
-		Version              string
-		Branch               string
-		Sources              string
-		Timeout              string
-		Inclusions           string
-		Exclusions           string
-		Level                string
-		ShowProfiling        string
-		BranchAnalysis       bool
-		UsingProperties      bool
-		Binaries             string
-		Quality              string
-		QualityEnabled       string
-		QualityTimeout       string
-		ArtifactFile         string
-		JavascitptIcovReport string
-		JavaCoveragePlugin   string
-		JacocoReportPath     string
-		SSLKeyStorePassword  string
-		CacertsLocation	     string
-		JunitReportPaths     string
-		SourceEncoding       string
-		SonarTests           string
-		JavaTest             string
-		PRKey                string
-		PRBranch             string
-		PRBase               string
-		CoverageExclusion    string   
-		JavaSource           string           
-		JavaLibraries        string    
-		SurefireReportsPath  string
+		Key                       string
+		Name                      string
+		Host                      string
+		Token                     string
+		Version                   string
+		Branch                    string
+		Sources                   string
+		Timeout                   string
+		Inclusions                string
+		Exclusions                string
+		Level                     string
+		ShowProfiling             string
+		BranchAnalysis            bool
+		UsingProperties           bool
+		Binaries                  string
+		Quality                   string
+		QualityEnabled            string
+		QualityTimeout            string
+		ArtifactFile              string
+		JavascitptIcovReport      string
+		JavaCoveragePlugin        string
+		JacocoReportPath          string
+		SSLKeyStorePassword       string
+		CacertsLocation           string
+		JunitReportPaths          string
+		SourceEncoding            string
+		SonarTests                string
+		JavaTest                  string
+		PRKey                     string
+		PRBranch                  string
+		PRBase                    string
+		CoverageExclusion         string
+		JavaSource                string
+		JavaLibraries             string
+		SurefireReportsPath       string
 		TypescriptLcovReportPaths string
-		Verbose              string 
-		CustomJvmParams      string
+		Verbose                   string
+		CustomJvmParams           string
 	}
 	// SonarReport it is the representation of .scannerwork/report-task.txt //
 	SonarReport struct {
@@ -246,7 +245,7 @@ func (p Plugin) Exec() error {
 	if len(p.Config.JacocoReportPath) >= 1 {
 		args = append(args, "-Dsonar.coverage.jacoco.xmlReportPaths="+p.Config.JacocoReportPath)
 		fmt.Printf("\n\n==> Sonar Java Plugin Jacoco configured!\n\n")
-		fmt.Printf("\n\n==> -Dsonar.coverage.jacoco.xmlReportPaths="+p.Config.JacocoReportPath+"\n\n")
+		fmt.Printf("\n\n==> -Dsonar.coverage.jacoco.xmlReportPaths=" + p.Config.JacocoReportPath + "\n\n")
 	}
 	if len(p.Config.JavaCoveragePlugin) >= 1 {
 		args = append(args, "-Dsonar.java.coveragePlugin="+p.Config.JavaCoveragePlugin)
@@ -264,11 +263,9 @@ func (p Plugin) Exec() error {
 	if len(p.Config.JavaTest) >= 1 {
 		args = append(args, "-Dsonar.java.test.binaries="+p.Config.JavaTest)
 	}
-	
 	if len(p.Config.CoverageExclusion) >= 1 {
 		args = append(args, "-Dsonar.coverage.exclusions="+p.Config.CoverageExclusion)
 	}
-	
 	if len(p.Config.JavaSource) >= 1 {
 		args = append(args, "-Dsonar.java.source="+p.Config.JavaSource)
 	}
@@ -288,43 +285,33 @@ func (p Plugin) Exec() error {
 	if len(p.Config.CustomJvmParams) >= 1 {
 
 		params := strings.Split(p.Config.CustomJvmParams, ",")
-		for i, param := range params {
+
+		for _, param := range params {
 			//fmt.Println(i, param)
 			args = append(args, param)
 		}
-		
+
 	}
-	
-	
-	
-	
-	
+
 	if len(p.Config.PRKey) >= 1 {
 		args = append(args, "-Dsonar.pullrequest.key="+p.Config.PRKey)
 	}
-	
+
 	if len(p.Config.PRBranch) >= 1 {
 		args = append(args, "-Dsonar.pullrequest.branch="+p.Config.PRBranch)
 	}
-	
+
 	if len(p.Config.PRBase) >= 1 {
 		args = append(args, "-Dsonar.pullrequest.base="+p.Config.PRBase)
 	}
-	
-	
-	
-	
-	
-	
+
 	if len(p.Config.SSLKeyStorePassword) >= 1 {
 		args = append(args, "-Djavax.net.ssl.trustStorePassword="+p.Config.SSLKeyStorePassword)
 	}
-	
+
 	if len(p.Config.CacertsLocation) >= 1 {
 		args = append(args, "-Djavax.net.ssl.trustStore="+p.Config.CacertsLocation)
 	}
-	
-	
 
 	os.Setenv("SONAR_USER_HOME", ".sonar")
 
@@ -377,7 +364,7 @@ func (p Plugin) Exec() error {
 		}).Fatal("Unable to get Job state")
 		return err
 	}
-	
+
 	fmt.Printf("\n")
 	fmt.Printf("#######################################\n")
 	fmt.Printf("Waiting for quality gate validation...\n")
