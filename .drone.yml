@@ -1,8 +1,13 @@
 kind: pipeline
 name: linux-amd64-sonarqube-scanner
+type: vm
+
 platform:
   os: linux
   arch: amd64
+pool:
+  use: ubuntu
+  
 steps:
 - name: pr test
   image: plugins/docker:18
@@ -11,9 +16,6 @@ steps:
     dockerfile: Dockerfile
     repo: plugins/sonarqube-scanner
     dry_run: true
-  when:
-    event:
-      - pull_request
 - name: publish
   image: plugins/docker:18
   settings:
@@ -47,5 +49,7 @@ steps:
       exclude:
       - pull_request
 trigger:
-  event:
-  - push
+  ref:
+    - refs/heads/master
+    - "refs/tags/**"
+    - "refs/pull/**"
