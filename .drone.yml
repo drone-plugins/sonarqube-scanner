@@ -7,49 +7,49 @@ platform:
   arch: amd64
 pool:
   use: ubuntu
-  
+
 steps:
-- name: pr test
-  image: plugins/docker:18
-  settings:
-    daemon_off: false
-    dockerfile: Dockerfile
-    repo: plugins/sonarqube-scanner
-    dry_run: true
-- name: publish
-  image: plugins/docker:18
-  settings:
-    auto_tag: true
-    auto_tag_suffix: linux-amd64
-    daemon_off: false
-    dockerfile: Dockerfile
-    password:
-      from_secret: docker_password
-    repo: plugins/sonarqube-scanner
-    username:
-      from_secret: docker_username
-  when:
-    ref:
-      - refs/heads/main
-      - refs/tags/**
-- name: publish-v1.0.8
-  image: plugins/docker:18
-  settings:
-    auto_tag: true
-    auto_tag_suffix: v1.0.8
-    daemon_off: false
-    dockerfile: Dockerfile
-    password:
-      from_secret: docker_password
-    repo: plugins/sonarqube-scanner
-    username:
-      from_secret: docker_username
-  when:
-    ref:
-      - refs/heads/main
-      - refs/tags/**
+  - name: pr test
+    image: plugins/docker:18
+    settings:
+      daemon_off: false
+      dockerfile: Dockerfile
+      repo: plugins/sonarqube-scanner
+      dry_run: true
+  - name: publish
+    image: plugins/docker:18
+    settings:
+      auto_tag: true
+      auto_tag_suffix: linux-amd64
+      daemon_off: false
+      dockerfile: Dockerfile
+      password:
+        from_secret: docker_password
+      repo: plugins/sonarqube-scanner
+      username:
+        from_secret: docker_username
+    when:
+      ref:
+        - refs/heads/main
+        - refs/tags/**
+  - name: publish-v1.0.8
+    image: plugins/docker:18
+    settings:
+      auto_tag: true
+      auto_tag_suffix: v1.0.8
+      daemon_off: false
+      dockerfile: Dockerfile
+      password:
+        from_secret: docker_password
+      repo: plugins/sonarqube-scanner
+      username:
+        from_secret: docker_username
+    when:
+      ref:
+        - refs/heads/main
+        - refs/tags/**
 trigger:
   ref:
-    - refs/heads/master
+    - refs/heads/main
     - "refs/tags/**"
     - "refs/pull/**"
