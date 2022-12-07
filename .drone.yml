@@ -29,9 +29,9 @@ steps:
     username:
       from_secret: docker_username
   when:
-    event:
-      exclude:
-      - pull_request
+    ref:
+      - refs/heads/main
+      - refs/tags/**
 - name: publish-v1.0.8
   image: plugins/docker:18
   settings:
@@ -45,9 +45,9 @@ steps:
     username:
       from_secret: docker_username
   when:
-    event:
-      exclude:
-      - pull_request
+    ref:
+      - refs/heads/main
+      - refs/tags/**
 trigger:
   ref:
     - refs/heads/master
