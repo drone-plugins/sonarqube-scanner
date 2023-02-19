@@ -210,11 +210,16 @@ func GetProjectKey(key string) string {
 	return projectKey
 }
 func (p Plugin) Exec() error {
+
 	args := []string{
 		"-Dsonar.host.url=" + p.Config.Host,
 		"-Dsonar.login=" + p.Config.Token,
 	}
 	projectFinalKey := p.Config.Key
+
+	if len(p.Config.Verbose) >= 1 {
+		args = append(args, "-X")
+	}
 
 	if !p.Config.UsingProperties {
 		argsParameter := []string{
