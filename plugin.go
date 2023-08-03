@@ -517,7 +517,15 @@ func getStatus(task *TaskResponse, report *SonarReport) string {
 	return project.ProjectStatus.Status
 }
 
-func getStatusID( taskID string, sonarHost string) string {
+func getStatusID( taskIDOld string, sonarHost string) string {
+
+	taskID, err := GetLatestTaskID(token, projectSlug)
+	if err != nil {
+		fmt.Println("Failed to get the latest task ID:", err)
+		return
+	}
+	fmt.Println("Latest task ID:", taskID)
+	
 	reportRequest := url.Values{
 		"analysisId": {taskID},
 	}
@@ -566,6 +574,40 @@ func getStatusID( taskID string, sonarHost string) string {
 	fmt.Printf("\n======> Harness Drone/CIE SonarQube Plugin <======\n\n====> Results:")
 
 	return project.ProjectStatus.Status
+}
+
+func GetLatestTaskID(sonarHost string, projectSlug string) (string, error) {
+	url := fmt.Sprintf("%s/api/project_analyses/search?project=%s&ps=1", sonarHost, projectSlug)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return "", err
+	}
+	req.SetBasicAuth(os.Getenv("TOKEN"), "")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	fmt.Printf(body)
+
+	var data AnalysisResponse
+	if err := json.Unmarshal(body, &data); err != nil {
+		return "", err
+	}
+
+	if len(data.Analyses) == 0 {
+		return "", fmt.Errorf("no analyses found for project %s", projectSlug)
+	}
+
+	return data.Analyses[0].Key, nil
 }
 
 func getSonarJobStatus(report *SonarReport) *TaskResponse {
