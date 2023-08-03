@@ -523,7 +523,7 @@ func getStatusID( taskID string, sonarHost string) string {
 	}
 	fmt.Printf("==> Job Status Request:\n")
 	fmt.Printf(sonarHost+"/api/qualitygates/project_status?"+reportRequest.Encode())
-	fmt.Printf(analysisId+":"+taskID)
+	fmt.Printf("analysisId:"+taskID)
 	projectRequest, err := http.NewRequest("GET", sonarHost+"/api/qualitygates/project_status?"+reportRequest.Encode(), nil)
 	projectRequest.Header.Add("Authorization", "Basic "+os.Getenv("TOKEN"))
 	projectResponse, err := netClient.Do(projectRequest)
