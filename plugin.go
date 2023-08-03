@@ -340,7 +340,7 @@ func (p Plugin) Exec() error {
 		fmt.Printf("#######################################\n")
 		fmt.Printf("Waiting for quality gate validation...\n")
 		fmt.Printf("#######################################\n")
-		status = getStatusID( p.Config)
+		status = getStatusID( p.Config.TaskId, p.Config.Host)
 	} else {
 		fmt.Printf("Starting Analisys")
 		fmt.Printf("\n")
@@ -517,11 +517,11 @@ func getStatus(task *TaskResponse, report *SonarReport) string {
 	return project.ProjectStatus.Status
 }
 
-func getStatusID( config *Config) string {
+func getStatusID( taskID string, sonarHost string) string {
 	reportRequest := url.Values{
-		"analysisId": {config.TaskId},
+		"analysisId": {taskID},
 	}
-	projectRequest, err := http.NewRequest("GET", config.Host+"/api/qualitygates/project_status?"+reportRequest.Encode(), nil)
+	projectRequest, err := http.NewRequest("GET", sonarHost+"/api/qualitygates/project_status?"+reportRequest.Encode(), nil)
 	projectRequest.Header.Add("Authorization", "Basic "+os.Getenv("TOKEN"))
 	projectResponse, err := netClient.Do(projectRequest)
 	if err != nil {
