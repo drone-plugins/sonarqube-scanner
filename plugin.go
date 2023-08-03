@@ -143,6 +143,12 @@ type (
 	}
 )
 
+type AnalysisResponse struct {
+	Analyses []struct {
+		Key string `json:"key"`
+	} `json:"analyses"`
+}
+
 func init() {
 	netClient = &http.Client{
 		Timeout: time.Second * 10,
