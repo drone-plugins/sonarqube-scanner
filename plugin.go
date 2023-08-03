@@ -346,7 +346,7 @@ func (p Plugin) Exec() error {
 		fmt.Printf("#######################################\n")
 		fmt.Printf("Waiting for quality gate validation...\n")
 		fmt.Printf("#######################################\n")
-		status = getStatusID( p.Config.TaskId, p.Config.Host)
+		status = getStatusID( p.Config.TaskId, p.Config.Host, p.Config.Key)
 	} else {
 		fmt.Printf("Starting Analisys")
 		fmt.Printf("\n")
@@ -523,8 +523,8 @@ func getStatus(task *TaskResponse, report *SonarReport) string {
 	return project.ProjectStatus.Status
 }
 
-func getStatusID( taskIDOld string, sonarHost string) string {
-
+func getStatusID( taskIDOld string, sonarHost string, projectSlug string) string {
+	token := os.Getenv("TOKEN")
 	taskID, err := GetLatestTaskID(token, projectSlug)
 	if err != nil {
 		fmt.Println("Failed to get the latest task ID:", err)
@@ -539,7 +539,7 @@ func getStatusID( taskIDOld string, sonarHost string) string {
 	fmt.Printf(sonarHost+"/api/qualitygates/project_status?"+reportRequest.Encode())
 	fmt.Printf("analysisId:"+taskID)
 	projectRequest, err := http.NewRequest("GET", sonarHost+"/api/qualitygates/project_status?"+reportRequest.Encode(), nil)
-	projectRequest.Header.Add("Authorization", "Basic "+os.Getenv("TOKEN"))
+	projectRequest.Header.Add("Authorization", "Basic "+token)
 	projectResponse, err := netClient.Do(projectRequest)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
