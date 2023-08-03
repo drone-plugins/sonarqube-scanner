@@ -583,8 +583,13 @@ func getStatusID( taskIDOld string, sonarHost string, projectSlug string) string
 }
 
 func GetLatestTaskID(sonarHost string, projectSlug string) (string, error) {
+	
 	url := fmt.Sprintf("%s/api/project_analyses/search?project=%s&ps=1", sonarHost, projectSlug)
+	
 	req, err := http.NewRequest("GET", url, nil)
+	req.Header.Add("Authorization", "Basic "+os.Getenv("TOKEN"))
+	projectResponse, err := netClient.Do(req)
+	
 	if err != nil {
 		return "", err
 	}
