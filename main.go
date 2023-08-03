@@ -233,6 +233,12 @@ func main() {
 			Value:  "",
 			EnvVar: "PLUGIN_CUSTOM_JVM_PARAMS",
 		},
+		cli.StringFlag{
+			Name:   "taskid",
+			Usage:  "sonar analisys taskid",
+			Value:  "",
+			EnvVar: "PLUGIN_TASKID",
+		},
 	}
 	app.Run(os.Args)
 }
@@ -277,6 +283,7 @@ func run(c *cli.Context) {
 			TypescriptLcovReportPaths: c.String("typescript_lcov_reportPaths"),
 			Verbose:                   c.String("verbose"),
 			CustomJvmParams:           c.String("custom_jvm_params"),
+			TaskId:                    c.String("taskid"),       
 		},
 	}
 	os.Setenv("TOKEN", base64.StdEncoding.EncodeToString([]byte(c.String("token")+":")))
