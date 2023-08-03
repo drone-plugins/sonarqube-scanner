@@ -583,24 +583,31 @@ func getStatusID( taskIDOld string, sonarHost string, projectSlug string) string
 }
 
 func GetLatestTaskID(sonarHost string, projectSlug string) (string, error) {
-	
+	fmt.Printf("Starting Task ID Discovery")
 	url := fmt.Sprintf("%s/api/project_analyses/search?project=%s&ps=1", sonarHost, projectSlug)
+	fmt.Printf("URL: %s", url)
 	
 	req, err := http.NewRequest("GET", url, nil)
 	// req.Header.Add("Authorization", "Basic "+os.Getenv("TOKEN"))
 
 	req.SetBasicAuth(os.Getenv("TOKEN"), "")
-
+	
 	client := &http.Client{}
+
+	
 	resp, err := client.Do(req)
 	if err != nil {
-		return "", err
+		fmt.Printf("\n\n==> Error in Task discovery\n\n")
+		fmt.Printf("Error: %s", err.Error())
+		return err
 	}
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return "", err
+		fmt.Printf("\n\n==> Error in Task discovery\n\n")
+		fmt.Printf("Error: %s", err.Error())
+		return err
 	}
 
 	fmt.Printf("%s", body)
