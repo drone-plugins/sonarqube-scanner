@@ -340,7 +340,7 @@ func (p Plugin) Exec() error {
 		fmt.Printf("#######################################\n")
 		fmt.Printf("Waiting for quality gate validation...\n")
 		fmt.Printf("#######################################\n")
-		status = getStatusID(task, p.Config)
+		status = getStatusID( p.Config)
 	} else {
 		fmt.Printf("Starting Analisys")
 		fmt.Printf("\n")
@@ -517,7 +517,7 @@ func getStatus(task *TaskResponse, report *SonarReport) string {
 	return project.ProjectStatus.Status
 }
 
-func getStatusID(task *TaskResponse, config *Config) string {
+func getStatusID( config *Config) string {
 	reportRequest := url.Values{
 		"analysisId": {config.TaskId},
 	}
