@@ -599,7 +599,7 @@ func GetLatestTaskID(sonarHost string, projectSlug string) (string, error) {
 	if err != nil {
 		fmt.Printf("\n\n==> Error in Task discovery\n\n")
 		fmt.Printf("Error: %s", err.Error())
-		return err
+		return "", err
 	}
 	defer resp.Body.Close()
 
@@ -607,7 +607,7 @@ func GetLatestTaskID(sonarHost string, projectSlug string) (string, error) {
 	if err != nil {
 		fmt.Printf("\n\n==> Error in Task discovery\n\n")
 		fmt.Printf("Error: %s", err.Error())
-		return err
+		return "", err
 	}
 
 	fmt.Printf("%s", body)
