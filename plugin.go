@@ -66,6 +66,7 @@ type (
 		TypescriptLcovReportPaths string
 		Verbose                   string
 		CustomJvmParams           string
+		TaskId                    string
 	}
 	// SonarReport it is the representation of .scannerwork/report-task.txt //
 	SonarReport struct {
@@ -321,62 +322,97 @@ func (p Plugin) Exec() error {
 	os.Setenv("SONAR_USER_HOME", ".sonar")
 
 	fmt.Printf("\n\n")
-	fmt.Printf("sonar-scanner")
+	fmt.Printf("Starting Plugin - Sonar Scanner Quality Gate Report")
+	fmt.Printf("\n")
+	fmt.Printf("Developed by Diego Pereira")
+	fmt.Printf("\n")
+	fmt.Printf("sonar Arguments:")
 	fmt.Printf("%v", args)
-	cmd := exec.Command("sonar-scanner", args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	fmt.Printf("\n\n==> Sonar Code Analysis Result:\n\n")
-	err := cmd.Run()
-	if err != nil {
-		fmt.Printf("\n\n==> Error in Analysis\n\n")
-		//return err
-	}
-	fmt.Printf("\n\nContinuing After Analysis\n\n")
-
-	cmd = exec.Command("cat", ".scannerwork/report-task.txt")
-
-	cmd.Stdout = os.Stdout
-
-	cmd.Stderr = os.Stderr
-	fmt.Printf("#######################################\n")
-	fmt.Printf("==> Report Result:\n")
-	fmt.Printf("#######################################\n")
-	err = cmd.Run()
-
-	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"error": err,
-		}).Fatal("Run command cat reportname failed")
-		return err
-	}
-
-	report, err := staticScan(&p)
-	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"error": err,
-		}).Fatal("Unable to scan")
-	}
-	logrus.WithFields(logrus.Fields{
-		"job url": report.CeTaskURL,
-	}).Info("Job url")
-
-	task, err := waitForSonarJob(report)
-
-	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"error": err,
-		}).Fatal("Unable to get Job state")
-		return err
-	}
-
 	fmt.Printf("\n")
-	fmt.Printf("#######################################\n")
-	fmt.Printf("Waiting for quality gate validation...\n")
-	fmt.Printf("#######################################\n")
 	fmt.Printf("\n")
 
-	status := getStatus(task, report)
+	status := ""
+
+        if p.Config.TaskId != "" {	
+		fmt.Printf("Skipping Scan...")
+		fmt.Printf("\n")
+		fmt.Printf("\n")
+		fmt.Printf("#######################################\n")
+		fmt.Printf("Waiting for quality gate validation...\n")
+		fmt.Printf("#######################################\n")
+		status = getStatusID(task, p.Config)
+	} else {
+		fmt.Printf("Starting Analisys")
+		fmt.Printf("\n")
+		cmd := exec.Command("sonar-scanner", args...)
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		err := cmd.Run()
+		if err != nil {
+			fmt.Printf("\n\n==> Error in Analysis\n\n")
+			fmt.Printf("Error: %s", err.Error())
+			//return err
+		}
+		fmt.Printf("\n==> Sonar Analysis Finished!\n\n")
+		fmt.Printf("\n\nStatic Analysis Result:\n\n")
+	
+		cmd = exec.Command("cat", ".scannerwork/report-task.txt")
+	
+		cmd.Stdout = os.Stdout
+	
+		cmd.Stderr = os.Stderr
+		fmt.Printf("\n")
+		fmt.Printf("#######################################\n")
+		fmt.Printf("==> Report Result:\n")
+		fmt.Printf("#######################################\n")
+		fmt.Printf("\n")
+		err = cmd.Run()
+	
+		if err != nil {
+			logrus.WithFields(logrus.Fields{
+				"error": err,
+			}).Fatal("Run command cat reportname failed")
+			return err
+		}
+	
+		fmt.Printf("\n\nParsing Results:\n\n")
+		fmt.Printf("\n")
+		
+		report, err := staticScan(&p)
+	
+		
+		if err != nil {
+			logrus.WithFields(logrus.Fields{
+				"error": err,
+			}).Fatal("Unable to parse scan results!")
+		}
+		logrus.WithFields(logrus.Fields{
+			"job url": report.CeTaskURL,
+		}).Info("Job url")
+		fmt.Printf("\n")
+		fmt.Printf("\n\nWaiting Analysis to finish:\n\n")
+		fmt.Printf("\n")
+	
+		task, err := waitForSonarJob(report)
+	
+		if err != nil {
+			logrus.WithFields(logrus.Fields{
+				"error": err,
+			}).Fatal("Unable to get Job state")
+			return err
+		}
+		
+	
+		fmt.Printf("\n")
+		fmt.Printf("#######################################\n")
+		fmt.Printf("Waiting for quality gate validation...\n")
+		fmt.Printf("#######################################\n")
+		fmt.Printf("\n")
+	
+		status = getStatus(task, report)
+	}
+
+	
 
 	fmt.Printf("\n")
 	fmt.Printf("==> SONAR PROJECT DASHBOARD <==\n")
@@ -438,6 +474,54 @@ func getStatus(task *TaskResponse, report *SonarReport) string {
 		"analysisId": {task.Task.AnalysisID},
 	}
 	projectRequest, err := http.NewRequest("GET", report.ServerURL+"/api/qualitygates/project_status?"+reportRequest.Encode(), nil)
+	projectRequest.Header.Add("Authorization", "Basic "+os.Getenv("TOKEN"))
+	projectResponse, err := netClient.Do(projectRequest)
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"error": err,
+		}).Fatal("Failed get status")
+	}
+	buf, _ := ioutil.ReadAll(projectResponse.Body)
+	project := ProjectStatusResponse{}
+	if err := json.Unmarshal(buf, &project); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"error": err,
+		}).Fatal("Failed")
+	}
+	fmt.Printf("==> Report Result:\n")
+	fmt.Printf(string(buf))
+
+	// JUNUT
+	junitReport := ""
+	junitReport = string(buf) // returns a string of what was written to it
+	fmt.Printf("\n---------------------> JUNIT Exporter <---------------------\n")
+	bytesReport := []byte(junitReport)
+	var projectReport Project
+	err = json.Unmarshal(bytesReport, &projectReport)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("%+v", projectReport)
+	fmt.Printf("\n")
+	result := ParseJunit(projectReport, "BankingApp")
+	file, _ := xml.MarshalIndent(result, "", " ")
+	_ = ioutil.WriteFile("sonarResults.xml", file, 0644)
+
+	fmt.Printf("\n")
+	fmt.Printf("\n======> JUNIT Exporter <======\n")
+
+	//JUNIT
+	fmt.Printf("\n======> Harness Drone/CIE SonarQube Plugin <======\n\n====> Results:")
+
+	return project.ProjectStatus.Status
+}
+
+func getStatusID(task *TaskResponse, config *Config) string {
+	reportRequest := url.Values{
+		"analysisId": {config.TaskId},
+	}
+	projectRequest, err := http.NewRequest("GET", config.Host+"/api/qualitygates/project_status?"+reportRequest.Encode(), nil)
 	projectRequest.Header.Add("Authorization", "Basic "+os.Getenv("TOKEN"))
 	projectResponse, err := netClient.Do(projectRequest)
 	if err != nil {
