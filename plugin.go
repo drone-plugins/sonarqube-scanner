@@ -143,6 +143,12 @@ type (
 	}
 )
 
+type AnalysisResponse struct {
+	Analyses []struct {
+		Key string `json:"key"`
+	} `json:"analyses"`
+}
+
 func init() {
 	netClient = &http.Client{
 		Timeout: time.Second * 10,
@@ -340,7 +346,13 @@ func (p Plugin) Exec() error {
 		fmt.Printf("#######################################\n")
 		fmt.Printf("Waiting for quality gate validation...\n")
 		fmt.Printf("#######################################\n")
-		status = getStatusID( p.Config.TaskId, p.Config.Host)
+		statusID, err := getStatusID( p.Config.TaskId, p.Config.Host, p.Config.Key)
+		if err != nil {
+			fmt.Printf("\n\n==> Error getting the latest scanID\n\n")
+			fmt.Printf("Error: %s", err.Error())
+			return err
+		}
+		status = statusID
 	} else {
 		fmt.Printf("Starting Analisys")
 		fmt.Printf("\n")
@@ -517,7 +529,15 @@ func getStatus(task *TaskResponse, report *SonarReport) string {
 	return project.ProjectStatus.Status
 }
 
-func getStatusID( taskID string, sonarHost string) string {
+func getStatusID( taskIDOld string, sonarHost string, projectSlug string) (string, error) {
+	token := os.Getenv("TOKEN")
+	taskID, err := GetLatestTaskID(token, projectSlug)
+	if err != nil {
+		fmt.Println("Failed to get the latest task ID:", err)
+		return "", err
+	}
+	fmt.Println("Latest task ID:", taskID)
+	
 	reportRequest := url.Values{
 		"analysisId": {taskID},
 	}
@@ -525,12 +545,13 @@ func getStatusID( taskID string, sonarHost string) string {
 	fmt.Printf(sonarHost+"/api/qualitygates/project_status?"+reportRequest.Encode())
 	fmt.Printf("analysisId:"+taskID)
 	projectRequest, err := http.NewRequest("GET", sonarHost+"/api/qualitygates/project_status?"+reportRequest.Encode(), nil)
-	projectRequest.Header.Add("Authorization", "Basic "+os.Getenv("TOKEN"))
+	projectRequest.Header.Add("Authorization", "Basic "+token)
 	projectResponse, err := netClient.Do(projectRequest)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"error": err,
 		}).Fatal("Failed get status")
+		return "", err
 	}
 	buf, _ := ioutil.ReadAll(projectResponse.Body)
 	project := ProjectStatusResponse{}
@@ -538,6 +559,7 @@ func getStatusID( taskID string, sonarHost string) string {
 		logrus.WithFields(logrus.Fields{
 			"error": err,
 		}).Fatal("Failed")
+		return "", nil
 	}
 	fmt.Printf("==> Report Result:\n")
 	fmt.Printf(string(buf))
@@ -551,6 +573,7 @@ func getStatusID( taskID string, sonarHost string) string {
 	err = json.Unmarshal(bytesReport, &projectReport)
 	if err != nil {
 		panic(err)
+		return "", err
 	}
 
 	fmt.Printf("%+v", projectReport)
@@ -565,7 +588,45 @@ func getStatusID( taskID string, sonarHost string) string {
 	//JUNIT
 	fmt.Printf("\n======> Harness Drone/CIE SonarQube Plugin <======\n\n====> Results:")
 
-	return project.ProjectStatus.Status
+	return project.ProjectStatus.Status, nil
+}
+
+func GetLatestTaskID(sonarHost string, projectSlug string) (string, error) {
+	fmt.Printf("Starting Task ID Discovery")
+	url := fmt.Sprintf("%s/api/project_analyses/search?project=%s&ps=1", sonarHost, projectSlug)
+	fmt.Printf("URL: %s", url)
+	
+	req, err := http.NewRequest("GET", url, nil)
+	// req.Header.Add("Authorization", "Basic "+os.Getenv("TOKEN"))
+
+	req.SetBasicAuth(os.Getenv("TOKEN"), "")
+	resp, err := netClient.Do(req)
+	if err != nil {
+		fmt.Printf("\n\n==> Error in Task discovery\n\n")
+		fmt.Printf("Error: %s", err.Error())
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Printf("\n\n==> Error in Task discovery\n\n")
+		fmt.Printf("Error: %s", err.Error())
+		return "", err
+	}
+
+	fmt.Printf("%s", body)
+
+	var data AnalysisResponse
+	if err := json.Unmarshal(body, &data); err != nil {
+		return "", err
+	}
+
+	if len(data.Analyses) == 0 {
+		return "", fmt.Errorf("no analyses found for project %s", projectSlug)
+	}
+
+	return data.Analyses[0].Key, nil
 }
 
 func getSonarJobStatus(report *SonarReport) *TaskResponse {
