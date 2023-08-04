@@ -338,6 +338,7 @@ func (p Plugin) Exec() error {
 	fmt.Printf("\n")
 
 	status := ""
+	err    := nil
 
         if p.Config.TaskId != "" {	
 		fmt.Printf("Skipping Scan...")
@@ -524,7 +525,7 @@ func getStatus(task *TaskResponse, report *SonarReport) string {
 	return project.ProjectStatus.Status
 }
 
-func getStatusID( taskIDOld string, sonarHost string, projectSlug string) string {
+func getStatusID( taskIDOld string, sonarHost string, projectSlug string) (string, error) {
 	token := os.Getenv("TOKEN")
 	taskID, err := GetLatestTaskID(token, projectSlug)
 	if err != nil {
