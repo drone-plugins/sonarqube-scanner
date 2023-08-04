@@ -338,7 +338,6 @@ func (p Plugin) Exec() error {
 	fmt.Printf("\n")
 
 	status := ""
-	err    := nil
 
         if p.Config.TaskId != "" {	
 		fmt.Printf("Skipping Scan...")
@@ -347,7 +346,7 @@ func (p Plugin) Exec() error {
 		fmt.Printf("#######################################\n")
 		fmt.Printf("Waiting for quality gate validation...\n")
 		fmt.Printf("#######################################\n")
-		status, err = getStatusID( p.Config.TaskId, p.Config.Host, p.Config.Key)
+		status, err := getStatusID( p.Config.TaskId, p.Config.Host, p.Config.Key)
 		
 	} else {
 		fmt.Printf("Starting Analisys")
