@@ -347,7 +347,11 @@ func (p Plugin) Exec() error {
 		fmt.Printf("Waiting for quality gate validation...\n")
 		fmt.Printf("#######################################\n")
 		status, err := getStatusID( p.Config.TaskId, p.Config.Host, p.Config.Key)
-		
+		if err != nil {
+			fmt.Printf("\n\n==> Error getting the latest scanID\n\n")
+			fmt.Printf("Error: %s", err.Error())
+			return err
+		}
 	} else {
 		fmt.Printf("Starting Analisys")
 		fmt.Printf("\n")
