@@ -346,7 +346,8 @@ func (p Plugin) Exec() error {
 		fmt.Printf("#######################################\n")
 		fmt.Printf("Waiting for quality gate validation...\n")
 		fmt.Printf("#######################################\n")
-		status = getStatusID( p.Config.TaskId, p.Config.Host, p.Config.Key)
+		status, err = getStatusID( p.Config.TaskId, p.Config.Host, p.Config.Key)
+		
 	} else {
 		fmt.Printf("Starting Analisys")
 		fmt.Printf("\n")
@@ -528,7 +529,7 @@ func getStatusID( taskIDOld string, sonarHost string, projectSlug string) string
 	taskID, err := GetLatestTaskID(token, projectSlug)
 	if err != nil {
 		fmt.Println("Failed to get the latest task ID:", err)
-		return
+		return "", err
 	}
 	fmt.Println("Latest task ID:", taskID)
 	
@@ -545,6 +546,7 @@ func getStatusID( taskIDOld string, sonarHost string, projectSlug string) string
 		logrus.WithFields(logrus.Fields{
 			"error": err,
 		}).Fatal("Failed get status")
+		return "", err
 	}
 	buf, _ := ioutil.ReadAll(projectResponse.Body)
 	project := ProjectStatusResponse{}
@@ -552,6 +554,7 @@ func getStatusID( taskIDOld string, sonarHost string, projectSlug string) string
 		logrus.WithFields(logrus.Fields{
 			"error": err,
 		}).Fatal("Failed")
+		return "", nil
 	}
 	fmt.Printf("==> Report Result:\n")
 	fmt.Printf(string(buf))
@@ -565,6 +568,7 @@ func getStatusID( taskIDOld string, sonarHost string, projectSlug string) string
 	err = json.Unmarshal(bytesReport, &projectReport)
 	if err != nil {
 		panic(err)
+		return "", err
 	}
 
 	fmt.Printf("%+v", projectReport)
@@ -579,7 +583,7 @@ func getStatusID( taskIDOld string, sonarHost string, projectSlug string) string
 	//JUNIT
 	fmt.Printf("\n======> Harness Drone/CIE SonarQube Plugin <======\n\n====> Results:")
 
-	return project.ProjectStatus.Status
+	return project.ProjectStatus.Status, nil
 }
 
 func GetLatestTaskID(sonarHost string, projectSlug string) (string, error) {
@@ -591,11 +595,7 @@ func GetLatestTaskID(sonarHost string, projectSlug string) (string, error) {
 	// req.Header.Add("Authorization", "Basic "+os.Getenv("TOKEN"))
 
 	req.SetBasicAuth(os.Getenv("TOKEN"), "")
-	
-	client := &http.Client{}
-
-	
-	resp, err := client.Do(req)
+	resp, err := netClient.Do(req)
 	if err != nil {
 		fmt.Printf("\n\n==> Error in Task discovery\n\n")
 		fmt.Printf("Error: %s", err.Error())
