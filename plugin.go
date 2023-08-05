@@ -613,21 +613,26 @@ func getStatusID(taskIDOld string, sonarHost string, projectSlug string) (string
 }
 
 func GetProjectStatus(sonarHost string, analysisId string, token string) ([]byte, error) {
+	fmt.Printf("\n")
+	fmt.Printf("Getting project status:" + analysisId)
 	netClient := &http.Client{
 		Timeout: time.Second * 10, // you can adjust the timeout
 	}
-	fmt.Printf("\n")
-	fmt.Printf("Requesting project status:" + analysisId)
 	projectRequest, err := http.NewRequest("GET", sonarHost+"/api/qualitygates/project_status?"+analysisId, nil)
 	if err != nil {
 		return nil, err
 	}
+	fmt.Printf("URL:" + sonarHost + "/api/qualitygates/project_status?" + analysisId)
+
+	fmt.Printf("\n")
+	fmt.Printf("Setting Authorization header:" + token)
 
 	projectRequest.Header.Add("Authorization", "Basic "+token)
 	projectResponse, err := netClient.Do(projectRequest)
 	if err != nil {
 		return nil, err
 	}
+	fmt.Printf("Response:" + projectResponse.Status)
 	defer projectResponse.Body.Close() // Always close the response body
 
 	fmt.Printf("\n")
