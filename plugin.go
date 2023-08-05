@@ -633,7 +633,7 @@ func GetProjectStatus(sonarHost string, analysisId string) ([]byte, error) {
 
 	if err != nil {
 		fmt.Printf("\n")
-		fmt.Printf("Error getting project status, trying again with bearer token...")
+		fmt.Printf("NIL - Error getting project status, trying again with bearer token...")
 
 		return nil, err
 
@@ -643,7 +643,11 @@ func GetProjectStatus(sonarHost string, analysisId string) ([]byte, error) {
 	if projectResponse.StatusCode == 401 {
 		bearer := "Bearer " + token
 		projectBearerRequest, err := http.NewRequest("GET", sonarHost+"/api/qualitygates/project_status?"+analysisId, nil)
-
+		if err != nil {
+			fmt.Printf("\n")
+			fmt.Printf("Error creating request")
+			return nil, err
+		}
 		projectBearerRequest.Header.Add("Authorization", bearer)
 		projectBearerResponse, err := netClient.Do(projectBearerRequest)
 		if err != nil {
@@ -655,8 +659,11 @@ func GetProjectStatus(sonarHost string, analysisId string) ([]byte, error) {
 		if projectBearerResponse.StatusCode == 401 {
 			fmt.Printf("\n")
 			fmt.Printf("Error getting project status, trying again with bearer token...")
+			return nil, fmt.Errorf("unauthorized to get project status")
 		}
-
+		projectResponse = projectBearerResponse
+		projectBearerResponse.Body.Close() // Always close the response body
+		fmt.Printf("\n")
 	}
 	defer projectResponse.Body.Close() // Always close the response body
 
