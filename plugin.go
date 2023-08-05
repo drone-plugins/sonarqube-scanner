@@ -531,7 +531,7 @@ func getStatus(task *TaskResponse, report *SonarReport) string {
 
 func getStatusID( taskIDOld string, sonarHost string, projectSlug string) (string, error) {
 	token := os.Getenv("TOKEN")
-	taskID, err := GetLatestTaskID(token, projectSlug)
+	taskID, err := GetLatestTaskID(sonarHost, projectSlug)
 	if err != nil {
 		fmt.Println("Failed to get the latest task ID:", err)
 		return "", err
