@@ -632,7 +632,7 @@ func GetProjectStatus(sonarHost string, analysisId string, token string) ([]byte
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("Response:" + projectResponse.Status)
+	fmt.Printf("Response Code:" + projectResponse.Status)
 	defer projectResponse.Body.Close() // Always close the response body
 
 	fmt.Printf("\n")
