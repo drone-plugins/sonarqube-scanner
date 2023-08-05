@@ -598,30 +598,39 @@ func GetLatestTaskID(sonarHost string, projectSlug string) (string, error) {
 	
 	req, err := http.NewRequest("GET", url, nil)
 	// req.Header.Add("Authorization", "Basic "+os.Getenv("TOKEN"))
-
-	req.SetBasicAuth(os.Getenv("TOKEN"), "")
-	resp, err := netClient.Do(req)
 	if err != nil {
-		fmt.Printf("\n\n==> Error in Task discovery\n\n")
+		fmt.Printf("\n\n==> Error to create request in Task discovery\n\n")
 		fmt.Printf("Error: %s", err.Error())
 		return "", err
 	}
-	defer resp.Body.Close()
 
+	fmt.Printf("Before Request")
+	req.SetBasicAuth(os.Getenv("TOKEN"), "")
+	resp, err := netClient.Do(req)
+	if err != nil {
+		fmt.Printf("\n\n==> Request Error in Task discovery\n\n")
+		fmt.Printf("Error: %s", err.Error())
+		return "", err
+	}
+	
+	fmt.Printf("After Request")
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Printf("\n\n==> Error in Task discovery\n\n")
 		fmt.Printf("Error: %s", err.Error())
 		return "", err
 	}
-
-	fmt.Printf("%s", body)
-
+	fmt.Printf("Before print")
+	bodyString := string(bodyBytes)
+	fmt.Printf("%s", bodyString)
+	
 	var data AnalysisResponse
-	if err := json.Unmarshal(body, &data); err != nil {
+	if err := json.Unmarshal(bodyBytes, &data); err != nil {
 		return "", err
 	}
 
+	fmt.Printf("Before analisys")
+	
 	if len(data.Analyses) == 0 {
 		return "", fmt.Errorf("no analyses found for project %s", projectSlug)
 	}
