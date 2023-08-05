@@ -621,7 +621,7 @@ func GetLatestTaskID(sonarHost string, projectSlug string) (string, error) {
 		return "", err
 	}
 	fmt.Printf("Before print")
-	bodyString := string(bodyBytes)
+	bodyString := string(body)
 	fmt.Printf("%s", bodyString)
 	
 	var data AnalysisResponse
