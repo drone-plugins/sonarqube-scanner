@@ -91,42 +91,41 @@ type (
 			Status        string `json:"status"`
 		} `json:"task"`
 	}
-	
+
 	// ProjectStatusResponse Get the quality gate status of a project or a Compute Engine task
 	ProjectStatusResponse struct {
 		ProjectStatus struct {
 			Status string `json:"status"`
 		} `json:"projectStatus"`
 	}
-	
+
 	Project struct {
 		ProjectStatus Status `json:"projectStatus"`
 	}
-	
+
 	Status struct {
-	    Status            string      `json:"status"`
-	    Conditions        []Condition `json:"conditions"`
-	    IgnoredConditions bool        `json:"ignoredConditions"`
-	    // Periods           []Period    `json:"periods,omitempty"` // some responses don't have this, so it's marked as omitempty
-	    // Period            *Period     `json:"period,omitempty"` // some responses don't have this, so it's marked as omitempty
+		Status            string      `json:"status"`
+		Conditions        []Condition `json:"conditions"`
+		IgnoredConditions bool        `json:"ignoredConditions"`
+		// Periods           []Period    `json:"periods,omitempty"` // some responses don't have this, so it's marked as omitempty
+		// Period            *Period     `json:"period,omitempty"` // some responses don't have this, so it's marked as omitempty
 	}
-	
+
 	Condition struct {
-	    Status        string `json:"status"`
-	    MetricKey     string `json:"metricKey"`
-	    Comparator    string `json:"comparator"`
-	    PeriodIndex   int    `json:"periodIndex"`
-	    ErrorThreshold string `json:"errorThreshold"`
-	    ActualValue   string `json:"actualValue"`
+		Status         string `json:"status"`
+		MetricKey      string `json:"metricKey"`
+		Comparator     string `json:"comparator"`
+		PeriodIndex    int    `json:"periodIndex"`
+		ErrorThreshold string `json:"errorThreshold"`
+		ActualValue    string `json:"actualValue"`
 	}
-	
+
 	// type Period struct {
 	//     Index     int    `json:"index"`
 	//     Mode      string `json:"mode"`
 	//     Date      string `json:"date"`
 	//     Parameter string `json:"parameter,omitempty"` // this might not always be present
 	// }
-
 
 	Testsuites struct {
 		XMLName   xml.Name    `xml:"testsuites"`
@@ -229,6 +228,7 @@ func GetProjectKey(key string) string {
 	projectKey = strings.Replace(key, "/", ":", -1)
 	return projectKey
 }
+
 func (p Plugin) Exec() error {
 
 	args := []string{
@@ -352,14 +352,14 @@ func (p Plugin) Exec() error {
 
 	status := ""
 
-        if p.Config.TaskId != "" {	
+	if p.Config.TaskId != "" {
 		fmt.Printf("Skipping Scan...")
 		fmt.Printf("\n")
 		fmt.Printf("\n")
 		fmt.Printf("#######################################\n")
 		fmt.Printf("Waiting for quality gate validation...\n")
 		fmt.Printf("#######################################\n")
-		statusID, err := getStatusID( p.Config.TaskId, p.Config.Host, p.Config.Key)
+		statusID, err := getStatusID(p.Config.TaskId, p.Config.Host, p.Config.Key)
 		if err != nil {
 			fmt.Printf("\n\n==> Error getting the latest scanID\n\n")
 			fmt.Printf("Error: %s", err.Error())
@@ -380,11 +380,11 @@ func (p Plugin) Exec() error {
 		}
 		fmt.Printf("\n==> Sonar Analysis Finished!\n\n")
 		fmt.Printf("\n\nStatic Analysis Result:\n\n")
-	
+
 		cmd = exec.Command("cat", ".scannerwork/report-task.txt")
-	
+
 		cmd.Stdout = os.Stdout
-	
+
 		cmd.Stderr = os.Stderr
 		fmt.Printf("\n")
 		fmt.Printf("#######################################\n")
@@ -392,20 +392,19 @@ func (p Plugin) Exec() error {
 		fmt.Printf("#######################################\n")
 		fmt.Printf("\n")
 		err = cmd.Run()
-	
+
 		if err != nil {
 			logrus.WithFields(logrus.Fields{
 				"error": err,
 			}).Fatal("Run command cat reportname failed")
 			return err
 		}
-	
+
 		fmt.Printf("\n\nParsing Results:\n\n")
 		fmt.Printf("\n")
-		
+
 		report, err := staticScan(&p)
-	
-		
+
 		if err != nil {
 			logrus.WithFields(logrus.Fields{
 				"error": err,
@@ -417,27 +416,24 @@ func (p Plugin) Exec() error {
 		fmt.Printf("\n")
 		fmt.Printf("\n\nWaiting Analysis to finish:\n\n")
 		fmt.Printf("\n")
-	
+
 		task, err := waitForSonarJob(report)
-	
+
 		if err != nil {
 			logrus.WithFields(logrus.Fields{
 				"error": err,
 			}).Fatal("Unable to get Job state")
 			return err
 		}
-		
-	
+
 		fmt.Printf("\n")
 		fmt.Printf("#######################################\n")
 		fmt.Printf("Waiting for quality gate validation...\n")
 		fmt.Printf("#######################################\n")
 		fmt.Printf("\n")
-	
+
 		status = getStatus(task, report)
 	}
-
-	
 
 	fmt.Printf("\n")
 	fmt.Printf("==> SONAR PROJECT DASHBOARD <==\n")
@@ -542,7 +538,7 @@ func getStatus(task *TaskResponse, report *SonarReport) string {
 	return project.ProjectStatus.Status
 }
 
-func getStatusID( taskIDOld string, sonarHost string, projectSlug string) (string, error) {
+func getStatusID(taskIDOld string, sonarHost string, projectSlug string) (string, error) {
 	token := os.Getenv("PLUGIN_SONAR_TOKEN")
 	taskID, err := GetLatestTaskID(sonarHost, projectSlug)
 	if err != nil {
@@ -550,18 +546,17 @@ func getStatusID( taskIDOld string, sonarHost string, projectSlug string) (strin
 		return "", err
 	}
 	fmt.Println("Latest task ID:", taskID)
-	
+
 	reportRequest := url.Values{
 		"analysisId": {taskID},
 	}
 	fmt.Printf("==> Job Status Request:\n")
-	fmt.Printf(sonarHost+"/api/qualitygates/project_status?"+reportRequest.Encode())
+	fmt.Printf(sonarHost + "/api/qualitygates/project_status?" + reportRequest.Encode())
 	fmt.Printf("\n")
 	fmt.Printf("\n")
-	fmt.Printf("analysisId:"+taskID)
+	fmt.Printf("analysisId:" + taskID)
 	fmt.Printf("\n")
 
-	
 	// projectRequest, err := http.NewRequest("GET", sonarHost+"/api/qualitygates/project_status?"+reportRequest.Encode(), nil)
 	// projectRequest.Header.Add("Authorization", "Basic "+token)
 	// projectResponse, err := netClient.Do(projectRequest)
@@ -572,14 +567,14 @@ func getStatusID( taskIDOld string, sonarHost string, projectSlug string) (strin
 	// 	return "", err
 	// }
 	// buf, _ := ioutil.ReadAll(projectResponse.Body)
-	buf, err := GetProjectStatus(sonarHost, reportRequest.Encode() ,token)
+	buf, err := GetProjectStatus(sonarHost, reportRequest.Encode(), token)
 
 	if err != nil {
-	    logrus.WithFields(logrus.Fields{
-	        "error": err,
-	    }).Error("Failed to get project status")
+		logrus.WithFields(logrus.Fields{
+			"error": err,
+		}).Error("Failed to get project status")
 	}
-	
+
 	project := ProjectStatusResponse{}
 	if err := json.Unmarshal(buf, &project); err != nil {
 		logrus.WithFields(logrus.Fields{
@@ -587,11 +582,9 @@ func getStatusID( taskIDOld string, sonarHost string, projectSlug string) (strin
 		}).Fatal("Failed")
 		return "", nil
 	}
-	
+
 	fmt.Printf("==> Report Result:\n")
 	fmt.Printf(string(buf))
-
-	
 
 	// JUNUT
 	junitReport := ""
@@ -602,7 +595,6 @@ func getStatusID( taskIDOld string, sonarHost string, projectSlug string) (strin
 	err = json.Unmarshal(bytesReport, &projectReport)
 	if err != nil {
 		panic(err)
-		return "", err
 	}
 
 	fmt.Printf("%+v", projectReport)
@@ -621,30 +613,44 @@ func getStatusID( taskIDOld string, sonarHost string, projectSlug string) (strin
 }
 
 func GetProjectStatus(sonarHost string, analysisId string, token string) ([]byte, error) {
-    netClient := &http.Client{
-        Timeout: time.Second * 10,  // you can adjust the timeout
-    }
+	fmt.Printf("\n")
+	fmt.Printf("Getting project status:" + analysisId)
+	netClient := &http.Client{
+		Timeout: time.Second * 10, // you can adjust the timeout
+	}
+	projectRequest, err := http.NewRequest("GET", sonarHost+"/api/qualitygates/project_status?"+analysisId, nil)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Printf("URL:" + sonarHost + "/api/qualitygates/project_status?" + analysisId)
 
-    projectRequest, err := http.NewRequest("GET", sonarHost+"/api/qualitygates/project_status?"+analysisId, nil)
-    if err != nil {
-        return nil, err
-    }
+	fmt.Printf("\n")
+	fmt.Printf("Setting Authorization header:" + token)
 
-    projectRequest.Header.Add("Authorization", "Basic "+token)
-    projectResponse, err := netClient.Do(projectRequest)
-    if err != nil {
-        return nil, err
-    }
-    defer projectResponse.Body.Close() // Always close the response body
+	projectRequest.Header.Add("Authorization", "Basic "+token)
+	projectResponse, err := netClient.Do(projectRequest)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Printf("Response Code:" + projectResponse.Status)
+	defer projectResponse.Body.Close() // Always close the response body
 
-    buf, err := ioutil.ReadAll(projectResponse.Body)
-    if err != nil {
-        return nil, err
-    }
+	fmt.Printf("\n")
+	fmt.Printf("Requested project status, parsing results...")
+	fmt.Printf("\n")
+	buf, err := ioutil.ReadAll(projectResponse.Body)
+	if err != nil {
+		fmt.Printf("\n")
+		fmt.Printf("Error parsing results...")
+		return nil, err
+	}
+	fmt.Printf("\n")
+	fmt.Printf("Quality Gate Results:")
+	fmt.Printf("\n")
+	fmt.Printf(string(buf))
 
-    return buf, nil
+	return buf, nil
 }
-
 
 func GetLatestTaskID(sonarHost string, projectSlug string) (string, error) {
 	fmt.Printf("\nStarting Task ID Discovery\n")
@@ -695,7 +701,6 @@ func GetLatestTaskID(sonarHost string, projectSlug string) (string, error) {
 
 	return data.Analyses[0].Key, nil
 }
-
 
 func getSonarJobStatus(report *SonarReport) *TaskResponse {
 
