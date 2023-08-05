@@ -592,51 +592,55 @@ func getStatusID( taskIDOld string, sonarHost string, projectSlug string) (strin
 }
 
 func GetLatestTaskID(sonarHost string, projectSlug string) (string, error) {
-	fmt.Printf("Starting Task ID Discovery")
+	fmt.Printf("\nStarting Task ID Discovery\n")
 	url := fmt.Sprintf("%s/api/project_analyses/search?project=%s&ps=1", sonarHost, projectSlug)
-	fmt.Printf("URL: %s", url)
-	
+	fmt.Printf("URL: %s\n", url)
+
 	req, err := http.NewRequest("GET", url, nil)
-	// req.Header.Add("Authorization", "Basic "+os.Getenv("TOKEN"))
 	if err != nil {
-		fmt.Printf("\n\n==> Error to create request in Task discovery\n\n")
-		fmt.Printf("Error: %s", err.Error())
+		fmt.Printf("\nError to create request in Task discovery: %s\n", err.Error())
 		return "", err
 	}
 
-	fmt.Printf("Before Request")
 	req.SetBasicAuth(os.Getenv("TOKEN"), "")
 	resp, err := netClient.Do(req)
 	if err != nil {
-		fmt.Printf("\n\n==> Request Error in Task discovery\n\n")
-		fmt.Printf("Error: %s", err.Error())
+		fmt.Printf("\nRequest Error in Task discovery: %s\n", err.Error())
 		return "", err
 	}
-	
-	fmt.Printf("After Request")
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("HTTP request error. Status code: %d", resp.StatusCode)
+	}
+
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Printf("\n\n==> Error in Task discovery\n\n")
-		fmt.Printf("Error: %s", err.Error())
-		return "", err
-	}
-	fmt.Printf("Before print")
-	bodyString := string(body)
-	fmt.Printf("%s", bodyString)
-	
-	var data AnalysisResponse
-	if err := json.Unmarshal(body, &data); err != nil {
+		fmt.Printf("\nError reading response body in Task discovery: %s\n", err.Error())
 		return "", err
 	}
 
-	fmt.Printf("Before analisys")
-	
+	if len(body) == 0 {
+		fmt.Printf("\nReceived empty response from server\n")
+		return "", errors.New("received empty response from server")
+	}
+
+	bodyString := string(body)
+	fmt.Printf("Response body: %s\n", bodyString)
+
+	var data AnalysisResponse
+	if err := json.Unmarshal(body, &data); err != nil {
+		fmt.Printf("\nError unmarshalling response body: %s\n", err.Error())
+		return "", err
+	}
+
 	if len(data.Analyses) == 0 {
 		return "", fmt.Errorf("no analyses found for project %s", projectSlug)
 	}
 
 	return data.Analyses[0].Key, nil
 }
+
 
 func getSonarJobStatus(report *SonarReport) *TaskResponse {
 
