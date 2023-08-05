@@ -625,7 +625,7 @@ func GetLatestTaskID(sonarHost string, projectSlug string) (string, error) {
 	fmt.Printf("%s", bodyString)
 	
 	var data AnalysisResponse
-	if err := json.Unmarshal(bodyBytes, &data); err != nil {
+	if err := json.Unmarshal(body, &data); err != nil {
 		return "", err
 	}
 
