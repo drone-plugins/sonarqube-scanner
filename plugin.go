@@ -667,6 +667,8 @@ func GetProjectStatus(sonarHost string, analysisId string) ([]byte, error) {
 	fmt.Printf("Quality Gate Results:")
 	fmt.Printf("\n")
 	fmt.Printf(string(buf))
+	fmt.Printf("\n")
+	fmt.Printf("\n")
 
 	return buf, nil
 }
