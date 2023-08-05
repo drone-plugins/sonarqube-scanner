@@ -91,29 +91,36 @@ type (
 			Status        string `json:"status"`
 		} `json:"task"`
 	}
+	
 	// ProjectStatusResponse Get the quality gate status of a project or a Compute Engine task
-	ProjectStatusResponse struct {
-		ProjectStatus struct {
-			Status string `json:"status"`
-		} `json:"projectStatus"`
+	type ProjectStatusResponse struct {
+	    ProjectStatus Status `json:"projectStatus"`
 	}
-	Project struct {
-		ProjectStatus Status `json:"projectStatus"`
+	
+	type Status struct {
+	    Status            string      `json:"status"`
+	    Conditions        []Condition `json:"conditions"`
+	    IgnoredConditions bool        `json:"ignoredConditions"`
+	    Periods           []Period    `json:"periods,omitempty"` // some responses don't have this, so it's marked as omitempty
+	    Period            *Period     `json:"period,omitempty"` // some responses don't have this, so it's marked as omitempty
 	}
-	Status struct {
-		Status            string      `json:"status"`
-		IgnoredConditions bool        `json:"ignoredConditions"`
-		Conditions        []Condition `json:"conditions"`
+	
+	type Condition struct {
+	    Status        string `json:"status"`
+	    MetricKey     string `json:"metricKey"`
+	    Comparator    string `json:"comparator"`
+	    PeriodIndex   int    `json:"periodIndex"`
+	    ErrorThreshold string `json:"errorThreshold"`
+	    ActualValue   string `json:"actualValue"`
+	}
+	
+	type Period struct {
+	    Index     int    `json:"index"`
+	    Mode      string `json:"mode"`
+	    Date      string `json:"date"`
+	    Parameter string `json:"parameter,omitempty"` // this might not always be present
 	}
 
-	Condition struct {
-		Status         string `json:"status"`
-		MetricKey      string `json:"metricKey"`
-		Comparator     string `json:"comparator"`
-		PeriodIndex    int    `json:"periodIndex"`
-		ErrorThreshold string `json:"errorThreshold"`
-		ActualValue    string `json:"actualValue"`
-	}
 
 	Testsuites struct {
 		XMLName   xml.Name    `xml:"testsuites"`
@@ -543,26 +550,41 @@ func getStatusID( taskIDOld string, sonarHost string, projectSlug string) (strin
 	}
 	fmt.Printf("==> Job Status Request:\n")
 	fmt.Printf(sonarHost+"/api/qualitygates/project_status?"+reportRequest.Encode())
+	fmt.Printf("\n")
+	fmt.Printf("\n")
 	fmt.Printf("analysisId:"+taskID)
-	projectRequest, err := http.NewRequest("GET", sonarHost+"/api/qualitygates/project_status?"+reportRequest.Encode(), nil)
-	projectRequest.Header.Add("Authorization", "Basic "+token)
-	projectResponse, err := netClient.Do(projectRequest)
+	fmt.Printf("\n")
+
+	
+	// projectRequest, err := http.NewRequest("GET", sonarHost+"/api/qualitygates/project_status?"+reportRequest.Encode(), nil)
+	// projectRequest.Header.Add("Authorization", "Basic "+token)
+	// projectResponse, err := netClient.Do(projectRequest)
+	// if err != nil {
+	// 	logrus.WithFields(logrus.Fields{
+	// 		"error": err,
+	// 	}).Fatal("Failed get status")
+	// 	return "", err
+	// }
+	// buf, _ := ioutil.ReadAll(projectResponse.Body)
+	// project := ProjectStatusResponse{}
+	// if err := json.Unmarshal(buf, &project); err != nil {
+	// 	logrus.WithFields(logrus.Fields{
+	// 		"error": err,
+	// 	}).Fatal("Failed")
+	// 	return "", nil
+	// }
+	buf, err := GetProjectStatus(sonarHost, reportRequest.Encode() ,token)
+
 	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"error": err,
-		}).Fatal("Failed get status")
-		return "", err
+	    logrus.WithFields(logrus.Fields{
+	        "error": err,
+	    }).Error("Failed to get project status")
 	}
-	buf, _ := ioutil.ReadAll(projectResponse.Body)
-	project := ProjectStatusResponse{}
-	if err := json.Unmarshal(buf, &project); err != nil {
-		logrus.WithFields(logrus.Fields{
-			"error": err,
-		}).Fatal("Failed")
-		return "", nil
-	}
+	
 	fmt.Printf("==> Report Result:\n")
 	fmt.Printf(string(buf))
+
+	
 
 	// JUNUT
 	junitReport := ""
@@ -590,6 +612,32 @@ func getStatusID( taskIDOld string, sonarHost string, projectSlug string) (strin
 
 	return project.ProjectStatus.Status, nil
 }
+
+func GetProjectStatus(sonarHost string, analysisId string, token string) ([]byte, error) {
+    netClient := &http.Client{
+        Timeout: time.Second * 10,  // you can adjust the timeout
+    }
+
+    projectRequest, err := http.NewRequest("GET", sonarHost+"/api/qualitygates/project_status?"+analysisId, nil)
+    if err != nil {
+        return nil, err
+    }
+
+    projectRequest.Header.Add("Authorization", "Basic "+token)
+    projectResponse, err := netClient.Do(projectRequest)
+    if err != nil {
+        return nil, err
+    }
+    defer projectResponse.Body.Close() // Always close the response body
+
+    buf, err := ioutil.ReadAll(projectResponse.Body)
+    if err != nil {
+        return nil, err
+    }
+
+    return buf, nil
+}
+
 
 func GetLatestTaskID(sonarHost string, projectSlug string) (string, error) {
 	fmt.Printf("\nStarting Task ID Discovery\n")
