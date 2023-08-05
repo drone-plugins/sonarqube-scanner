@@ -486,7 +486,7 @@ func getStatus(task *TaskResponse, report *SonarReport) string {
 		"analysisId": {task.Task.AnalysisID},
 	}
 	projectRequest, err := http.NewRequest("GET", report.ServerURL+"/api/qualitygates/project_status?"+reportRequest.Encode(), nil)
-	projectRequest.Header.Add("Authorization", "Basic "+os.Getenv("TOKEN"))
+	projectRequest.Header.Add("Authorization", "Basic "+os.Getenv("PLUGIN_SONAR_TOKEN"))
 	projectResponse, err := netClient.Do(projectRequest)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
@@ -530,7 +530,7 @@ func getStatus(task *TaskResponse, report *SonarReport) string {
 }
 
 func getStatusID( taskIDOld string, sonarHost string, projectSlug string) (string, error) {
-	token := os.Getenv("TOKEN")
+	token := os.Getenv("PLUGIN_SONAR_TOKEN")
 	taskID, err := GetLatestTaskID(sonarHost, projectSlug)
 	if err != nil {
 		fmt.Println("Failed to get the latest task ID:", err)
@@ -602,7 +602,7 @@ func GetLatestTaskID(sonarHost string, projectSlug string) (string, error) {
 		return "", err
 	}
 
-	req.SetBasicAuth(os.Getenv("TOKEN"), "")
+	req.SetBasicAuth(os.Getenv("PLUGIN_SONAR_TOKEN"), "")
 	resp, err := netClient.Do(req)
 	if err != nil {
 		fmt.Printf("\nRequest Error in Task discovery: %s\n", err.Error())
@@ -645,7 +645,7 @@ func GetLatestTaskID(sonarHost string, projectSlug string) (string, error) {
 func getSonarJobStatus(report *SonarReport) *TaskResponse {
 
 	taskRequest, err := http.NewRequest("GET", report.CeTaskURL, nil)
-	taskRequest.Header.Add("Authorization", "Basic "+os.Getenv("TOKEN"))
+	taskRequest.Header.Add("Authorization", "Basic "+os.Getenv("PLUGIN_SONAR_TOKEN"))
 	taskResponse, err := netClient.Do(taskRequest)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
