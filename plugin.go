@@ -572,19 +572,20 @@ func getStatusID( taskIDOld string, sonarHost string, projectSlug string) (strin
 	// 	return "", err
 	// }
 	// buf, _ := ioutil.ReadAll(projectResponse.Body)
-	// project := ProjectStatusResponse{}
-	// if err := json.Unmarshal(buf, &project); err != nil {
-	// 	logrus.WithFields(logrus.Fields{
-	// 		"error": err,
-	// 	}).Fatal("Failed")
-	// 	return "", nil
-	// }
 	buf, err := GetProjectStatus(sonarHost, reportRequest.Encode() ,token)
 
 	if err != nil {
 	    logrus.WithFields(logrus.Fields{
 	        "error": err,
 	    }).Error("Failed to get project status")
+	}
+	
+	project := ProjectStatusResponse{}
+	if err := json.Unmarshal(buf, &project); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"error": err,
+		}).Fatal("Failed")
+		return "", nil
 	}
 	
 	fmt.Printf("==> Report Result:\n")
