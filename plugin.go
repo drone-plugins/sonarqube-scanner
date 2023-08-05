@@ -539,7 +539,7 @@ func getStatus(task *TaskResponse, report *SonarReport) string {
 }
 
 func getStatusID(taskIDOld string, sonarHost string, projectSlug string) (string, error) {
-	token := os.Getenv("PLUGIN_SONAR_TOKEN")
+	// token := os.Getenv("PLUGIN_SONAR_TOKEN")
 	taskID, err := GetLatestTaskID(sonarHost, projectSlug)
 	if err != nil {
 		fmt.Println("Failed to get the latest task ID:", err)
@@ -567,7 +567,7 @@ func getStatusID(taskIDOld string, sonarHost string, projectSlug string) (string
 	// 	return "", err
 	// }
 	// buf, _ := ioutil.ReadAll(projectResponse.Body)
-	buf, err := GetProjectStatus(sonarHost, reportRequest.Encode(), token)
+	buf, err := GetProjectStatus(sonarHost, reportRequest.Encode())
 
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
@@ -612,7 +612,8 @@ func getStatusID(taskIDOld string, sonarHost string, projectSlug string) (string
 	return project.ProjectStatus.Status, nil
 }
 
-func GetProjectStatus(sonarHost string, analysisId string, token string) ([]byte, error) {
+func GetProjectStatus(sonarHost string, analysisId string) ([]byte, error) {
+	token := os.Getenv("PLUGIN_SONAR_TOKEN")
 	fmt.Printf("\n")
 	fmt.Printf("Getting project status:" + analysisId)
 	netClient := &http.Client{
