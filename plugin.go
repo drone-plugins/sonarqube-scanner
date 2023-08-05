@@ -107,8 +107,8 @@ type (
 	    Status            string      `json:"status"`
 	    Conditions        []Condition `json:"conditions"`
 	    IgnoredConditions bool        `json:"ignoredConditions"`
-	    Periods           []Period    `json:"periods,omitempty"` // some responses don't have this, so it's marked as omitempty
-	    Period            *Period     `json:"period,omitempty"` // some responses don't have this, so it's marked as omitempty
+	    // Periods           []Period    `json:"periods,omitempty"` // some responses don't have this, so it's marked as omitempty
+	    // Period            *Period     `json:"period,omitempty"` // some responses don't have this, so it's marked as omitempty
 	}
 	
 	Condition struct {
@@ -120,12 +120,12 @@ type (
 	    ActualValue   string `json:"actualValue"`
 	}
 	
-	type Period struct {
-	    Index     int    `json:"index"`
-	    Mode      string `json:"mode"`
-	    Date      string `json:"date"`
-	    Parameter string `json:"parameter,omitempty"` // this might not always be present
-	}
+	// type Period struct {
+	//     Index     int    `json:"index"`
+	//     Mode      string `json:"mode"`
+	//     Date      string `json:"date"`
+	//     Parameter string `json:"parameter,omitempty"` // this might not always be present
+	// }
 
 
 	Testsuites struct {
