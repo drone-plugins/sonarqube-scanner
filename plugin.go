@@ -630,10 +630,28 @@ func GetProjectStatus(sonarHost string, analysisId string) ([]byte, error) {
 
 	projectRequest.Header.Add("Authorization", "Basic "+token)
 	projectResponse, err := netClient.Do(projectRequest)
+
 	if err != nil {
+		fmt.Printf("\n")
+		fmt.Printf("Error getting project status, trying again with bearer token...")
+
 		return nil, err
+
 	}
 	fmt.Printf("Response Code:" + projectResponse.Status)
+	// if status code 401 try again with bearer token
+	if projectResponse.StatusCode == 401 {
+		bearer := "Bearer " + token
+		projectRequest.Header.Add("Authorization", bearer)
+		projectResponse, err = netClient.Do(projectRequest)
+		if err != nil {
+			fmt.Printf("\n")
+			fmt.Printf("Error getting project status, trying again with bearer token...")
+			return nil, err
+		}
+		fmt.Printf("Response Code with Bearer:" + projectResponse.Status)
+
+	}
 	defer projectResponse.Body.Close() // Always close the response body
 
 	fmt.Printf("\n")
