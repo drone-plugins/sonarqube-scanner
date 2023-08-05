@@ -93,11 +93,17 @@ type (
 	}
 	
 	// ProjectStatusResponse Get the quality gate status of a project or a Compute Engine task
-	type ProjectStatusResponse struct {
-	    ProjectStatus Status `json:"projectStatus"`
+	ProjectStatusResponse struct {
+		ProjectStatus struct {
+			Status string `json:"status"`
+		} `json:"projectStatus"`
 	}
 	
-	type Status struct {
+	Project struct {
+		ProjectStatus Status `json:"projectStatus"`
+	}
+	
+	Status struct {
 	    Status            string      `json:"status"`
 	    Conditions        []Condition `json:"conditions"`
 	    IgnoredConditions bool        `json:"ignoredConditions"`
@@ -105,7 +111,7 @@ type (
 	    Period            *Period     `json:"period,omitempty"` // some responses don't have this, so it's marked as omitempty
 	}
 	
-	type Condition struct {
+	Condition struct {
 	    Status        string `json:"status"`
 	    MetricKey     string `json:"metricKey"`
 	    Comparator    string `json:"comparator"`
