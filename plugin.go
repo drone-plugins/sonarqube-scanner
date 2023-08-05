@@ -665,7 +665,6 @@ func GetProjectStatus(sonarHost string, analysisId string) ([]byte, error) {
 		projectBearerResponse.Body.Close() // Always close the response body
 		fmt.Printf("\n")
 	}
-	defer projectResponse.Body.Close() // Always close the response body
 
 	fmt.Printf("\n")
 	fmt.Printf("Requested project status, parsing results...")
@@ -682,6 +681,7 @@ func GetProjectStatus(sonarHost string, analysisId string) ([]byte, error) {
 	fmt.Printf(string(buf))
 	fmt.Printf("\n")
 	fmt.Printf("\n")
+	defer projectResponse.Body.Close() // Always close the response body
 
 	return buf, nil
 }
