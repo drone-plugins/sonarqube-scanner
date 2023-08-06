@@ -639,6 +639,7 @@ func GetProjectStatus(sonarHost string, analysisId string) ([]byte, error) {
 
 	}
 	fmt.Printf("Response Code:" + projectResponse.Status)
+	buf := []byte{}
 	// if status code 401 try again with bearer token
 	if projectResponse.StatusCode == 401 {
 		bearer := "Bearer " + token
@@ -661,24 +662,33 @@ func GetProjectStatus(sonarHost string, analysisId string) ([]byte, error) {
 			fmt.Printf("Error getting project status, trying again with bearer token...")
 			return nil, fmt.Errorf("unauthorized to get project status")
 		}
-		projectResponse = projectBearerResponse
-		projectBearerResponse.Body.Close() // Always close the response body
+		bufResponse, err := ioutil.ReadAll(projectBearerResponse.Body)
+		if err != nil {
+			fmt.Printf("\n")
+			fmt.Printf("Error parsing results...")
+			return nil, err
+		}
+		buf = bufResponse
+		defer projectBearerResponse.Body.Close()
 		fmt.Printf("\n")
+		// projectBearerResponse.Body.Close() // Always close the response body
+	} else {
+		fmt.Printf("\n")
+		fmt.Printf("Requested project status, parsing results...")
+		fmt.Printf("\n")
+		bufBasicResponse, err := ioutil.ReadAll(projectResponse.Body)
+		if err != nil {
+			fmt.Printf("\n")
+			fmt.Printf("Error parsing results...")
+			return nil, err
+		}
+		buf = bufBasicResponse
 	}
 
 	fmt.Printf("\n")
-	fmt.Printf("Requested project status, parsing results...")
+	fmt.Printf("Quality Gate Results (JSON):")
 	fmt.Printf("\n")
-	buf, err := ioutil.ReadAll(projectResponse.Body)
-	if err != nil {
-		fmt.Printf("\n")
-		fmt.Printf("Error parsing results...")
-		return nil, err
-	}
-	fmt.Printf("\n")
-	fmt.Printf("Quality Gate Results:")
-	fmt.Printf("\n")
-	fmt.Printf(string(buf))
+	fmt.Print(string(buf))
 	fmt.Printf("\n")
 	fmt.Printf("\n")
 	defer projectResponse.Body.Close() // Always close the response body
