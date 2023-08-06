@@ -282,11 +282,8 @@ func ParseJunit(projectArray Project, projectName string) Testsuites {
 		total += 1
 		if condition.Status != "OK" {
 			failed += 1
-			// Check if the metricKey starts with "new_"
 			if strings.HasPrefix(condition.MetricKey, "new_") {
 				newErrors += 1
-			} else {
-				errors += 1
 			}
 			cond := &Testcase{
 				Name:      condition.MetricKey,
@@ -303,6 +300,10 @@ func ParseJunit(projectArray Project, projectName string) Testsuites {
 			testCases = append(testCases, *cond)
 		}
 	}
+
+	// Display the summary
+	passed := total - failed // Corrected this line
+
 	os.Setenv("SONAR_RESULT_NEW_ERRORS", fmt.Sprintf("%d", newErrors))  // Set the number of new errors as an environment variable
 	os.Setenv("SONAR_RESULT_OVERALL_ERRORS", fmt.Sprintf("%d", errors)) // Set the number of errors as an environment variable
 
@@ -321,9 +322,6 @@ func ParseJunit(projectArray Project, projectName string) Testsuites {
 	out, _ = xml.MarshalIndent(testCases, " ", "  ")
 	fmt.Println(string(out))
 	fmt.Printf("\n")
-
-	// Display the summary
-	passed := total - errors
 
 	projectJSON, err := json.Marshal(projectArray)
 	if err != nil {
