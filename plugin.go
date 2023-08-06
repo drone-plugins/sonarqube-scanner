@@ -557,27 +557,51 @@ func (p Plugin) Exec() error {
 	// "Docker", p.Config.ArtifactFile, (p.Config.Host + sonarDashStatic + p.Config.Name), "Sonar", "Harness Sonar Plugin", []string{"Diego", "latest"})
 
 	if status != p.Config.Quality && p.Config.QualityEnabled == "true" {
-		fmt.Printf("\n==> QUALITY ENABLED ENALED  - set quality_gate_enabled as false to disable qg\n")
+		// fmt.Printf("\n==> QUALITY ENABLED ENALED  - set quality_gate_enabled as false to disable qg\n")
 		logrus.WithFields(logrus.Fields{
 			"status": status,
 		}).Fatal("QualityGate status failed")
 	}
 	if status != p.Config.Quality && p.Config.QualityEnabled == "false" {
-		fmt.Printf("\n==> QUALITY GATEWAY DISABLED\n")
-		fmt.Printf("\n==> FAILED <==\n")
+		// fmt.Printf("\n==> QUALITY GATEWAY DISABLED\n")
+		// fmt.Printf("\n==> FAILED <==\n")
 		logrus.WithFields(logrus.Fields{
 			"status": status,
 		}).Info("Quality Gate Status FAILED")
 	}
 	if status == p.Config.Quality {
-		fmt.Printf("\n==> QUALITY GATEWAY ENALED \n")
-		fmt.Printf("\n==> PASSED <==\n")
+		// fmt.Printf("\n==> QUALITY GATEWAY ENALED \n")
+		// fmt.Printf("\n==> PASSED <==\n")
 		logrus.WithFields(logrus.Fields{
 			"status": status,
 		}).Info("Quality Gate Status Success")
 	}
 
+	displayQualityGateStatus(status, p.Config.QualityEnabled == "true")
+
 	return nil
+}
+
+func displayQualityGateStatus(status string, qualityEnabled bool) {
+	fmt.Println("----------------------------------------------")
+	fmt.Printf("|        QUALITY GATE STATUS  |     STATUS     |\n")
+	fmt.Println("----------------------------------------------")
+
+	if status == "SUCCESS" {
+		fmt.Printf("|         (\033[32mPASSED\033[0m)              |      \033[32m%s\033[0m       |\n", status)
+	} else {
+		fmt.Printf("|         (\033[31mFAILED\033[0m)              |      \033[31m%s\033[0m       |\n", status)
+	}
+
+	fmt.Println("----------------------------------------------")
+
+	if qualityEnabled {
+		fmt.Printf("|      QUALITY GATE ENABLED   |       \033[32mYES\033[0m       |\n")
+	} else {
+		fmt.Printf("|      QUALITY GATE ENABLED   |       \033[31mNO\033[0m        |\n")
+	}
+
+	fmt.Println("----------------------------------------------")
 }
 
 func staticScan(p *Plugin) (*SonarReport, error) {
@@ -628,7 +652,9 @@ func getStatus(task *TaskResponse, report *SonarReport) string {
 	// JUNUT
 	junitReport := ""
 	junitReport = string(buf) // returns a string of what was written to it
-	fmt.Printf("\n---------------------> JUNIT Exporter <---------------------\n")
+	fmt.Println("----------------------------------------------")
+	fmt.Printf("|      SONAR SCAN + JUNIT EXPORTER PLUGIN      |\n")
+	fmt.Print("----------------------------------------------\n\n\n")
 	bytesReport := []byte(junitReport)
 	var projectReport Project
 	err = json.Unmarshal(bytesReport, &projectReport)
@@ -642,11 +668,9 @@ func getStatus(task *TaskResponse, report *SonarReport) string {
 	file, _ := xml.MarshalIndent(result, "", " ")
 	_ = ioutil.WriteFile("sonarResults.xml", file, 0644)
 
-	fmt.Printf("\n")
-	fmt.Printf("\n======> JUNIT Exporter <======\n")
-
-	//JUNIT
-	fmt.Printf("\n======> Harness Drone/CIE SonarQube Plugin <======\n\n====> Results:")
+	fmt.Println("----------------------------------------------")
+	fmt.Printf("|  Harness Drone/CIE SonarQube Plugin Results  |\n")
+	fmt.Print("----------------------------------------------\n\n\n")
 
 	return project.ProjectStatus.Status
 }
