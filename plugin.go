@@ -240,7 +240,7 @@ func displaySummary(total, passed, failed int, errors int, newErrors int, projec
 	}
 
 	// Write to the .env file
-	filePath := fmt.Sprintf("%s/.env", droneOutputPath)
+	filePath := fmt.Sprintf("%s", droneOutputPath)
 	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		fmt.Println("Error opening/creating .env file:", err)
