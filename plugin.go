@@ -200,6 +200,7 @@ func displaySummary(total, passed, failed int, errors int, newErrors int, projec
 
 	// Get the path for DRONE_OUTPUT
 	droneOutputPath := os.Getenv("DRONE_OUTPUT")
+	fmt.Print("\nDRONE_OUTPUT var: " + droneOutputPath + "\n")
 	if droneOutputPath == "" {
 		fmt.Print("\nError: DRONE_OUTPUT environment variable not set.\n")
 		fmt.Print("\nError: Probably you are not running in Harness or Drone.\n")
@@ -222,22 +223,10 @@ func displaySummary(total, passed, failed int, errors int, newErrors int, projec
 	if successRate >= 90 {
 		category = "\033[32mExcellent\033[0m" // Green
 	} else if successRate >= 70 {
-		category = "\033[1;34mGood\033[0m" // Blue
+		category = "\033[1;34mGood\033[0m" // Light Blue
 	} else {
-		category = "\033[1;31mNeeds Improvement\033[0m" // Red
+		category = "\033[1;31mNeeds Improvement\033[0m" // Light Red
 	}
-
-	// Display the table
-	fmt.Println("----------------------------------------------")
-	fmt.Printf("|           STATUS           |      COUNT      |\n")
-	fmt.Println("----------------------------------------------")
-	fmt.Printf("|      (\033[32mPASSED\033[0m)              |      %d         |\n", passed)
-	fmt.Println("----------------------------------------------")
-	fmt.Printf("|      (\033[31mFAILED\033[0m)              |      %d         |\n", failed)
-	fmt.Println("----------------------------------------------")
-	fmt.Printf("|      TOTAL                 |      %d         |\n", total)
-	fmt.Println("----------------------------------------------")
-	fmt.Printf("\n\nCategorization: %s\n", category)
 
 	// Prepare your environment variables
 	vars := map[string]string{
@@ -255,18 +244,32 @@ func displaySummary(total, passed, failed int, errors int, newErrors int, projec
 	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		fmt.Println("Error opening/creating .env file:", err)
-		return
+		// return
 	}
-	defer file.Close()
 
 	for key, value := range vars {
+		fmt.Println("Writing to .env file:", key, value)
 		_, err = file.WriteString(fmt.Sprintf("%s=%s\n", key, value))
 		if err != nil {
 			fmt.Println("Error writing to .env file:", err)
-			return
+			// return
 		}
 	}
-
+	fmt.Println("Successfully wrote to .env file")
+	defer file.Close()
+	fmt.Println("Successfully closed .env file")
+	fmt.Print("\n\n")
+	// Display the table
+	fmt.Println("----------------------------------------------")
+	fmt.Printf("|           STATUS           |      COUNT      |\n")
+	fmt.Println("----------------------------------------------")
+	fmt.Printf("|      (\033[32mPASSED\033[0m)              |      %d         |\n", passed)
+	fmt.Println("----------------------------------------------")
+	fmt.Printf("|      (\033[31mFAILED\033[0m)              |      %d         |\n", failed)
+	fmt.Println("----------------------------------------------")
+	fmt.Printf("|      TOTAL                 |      %d         |\n", total)
+	fmt.Println("----------------------------------------------")
+	fmt.Printf("\n\nCategorization: %s\n", category)
 }
 
 func ParseJunit(projectArray Project, projectName string) Testsuites {
