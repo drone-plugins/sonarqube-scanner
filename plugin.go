@@ -196,27 +196,37 @@ func TryCatch(f func()) func() error {
 // displaySummary provides a colorful summary of the results in the terminal.
 func displaySummary(total, passed, failed int) {
 	// Calculate the success rate
-	successRate := float64(passed) / float64(total) * 100
+	var successRate float64
+	if total != 0 {
+		successRate = float64(passed) / float64(total) * 100
+	} else {
+		successRate = 0 // or any other default value
+	}
+
+	os.Setenv("SONAR_RESULT_SUCCESS_RATE", fmt.Sprintf("%.2f", successRate)) // Round to two decimal places and set as an environment variable
+	os.Setenv("SONAR_RESULT_TOTAL", fmt.Sprintf("%d", total))                // Set the total number of tests as an environment variable
+	os.Setenv("SONAR_RESULT_PASSED", fmt.Sprintf("%d", passed))              // Set the number of passed tests as an environment variable
+	os.Setenv("SONAR_RESULT_FAILED", fmt.Sprintf("%d", failed))              // Set the number of failed tests as an environment variable
 
 	// Categorize the results
 	var category string
 	if successRate >= 90 {
 		category = "\033[32mExcellent\033[0m" // Green
 	} else if successRate >= 70 {
-		category = "\033[34mGood\033[0m" // Blue
+		category = "\033[1;34mGood\033[0m" // Blue
 	} else {
-		category = "\033[31mNeeds Improvement\033[0m" // Red
+		category = "\033[1;31mNeeds Improvement\033[0m" // Red
 	}
 
 	// Display the table
 	fmt.Println("----------------------------------------------")
-	fmt.Printf("| STATUS                     | COUNT           |\n")
+	fmt.Printf("|           STATUS           |      COUNT      |\n")
 	fmt.Println("----------------------------------------------")
-	fmt.Printf("| (\033[32mPASSED\033[0m)                   | %d              |\n", passed)
+	fmt.Printf("|      (\033[32mPASSED\033[0m)              |      %d         |\n", passed)
 	fmt.Println("----------------------------------------------")
-	fmt.Printf("| (\033[31mFAILED\033[0m)                   | %d              |\n", failed)
+	fmt.Printf("|      (\033[31mFAILED\033[0m)              |      %d         |\n", failed)
 	fmt.Println("----------------------------------------------")
-	fmt.Printf("| TOTAL                                     | %d              |\n", total)
+	fmt.Printf("|      TOTAL                 |      %d         |\n", total)
 	fmt.Println("----------------------------------------------")
 	fmt.Printf("\n\nCategorization: %s\n", category)
 }
@@ -225,6 +235,7 @@ func ParseJunit(projectArray Project, projectName string) Testsuites {
 	errors := 0
 	total := 0
 	testCases := []Testcase{}
+	newErrors := 0
 
 	conditionsArray := projectArray.ProjectStatus.Conditions
 
@@ -232,6 +243,16 @@ func ParseJunit(projectArray Project, projectName string) Testsuites {
 		total += 1
 		if condition.Status != "OK" {
 			errors += 1
+			// Check if the metricKey starts with "new_"
+			if strings.HasPrefix(condition.MetricKey, "new_") {
+				if condition.Status != "OK" {
+					newErrors += 1
+				}
+			} else {
+				if condition.Status != "OK" {
+					errors += 1
+				}
+			}
 			cond := &Testcase{
 				Name:      condition.MetricKey,
 				Classname: "Violate if " + condition.ActualValue + " is " + condition.Comparator + " " + condition.ErrorThreshold,
@@ -247,6 +268,8 @@ func ParseJunit(projectArray Project, projectName string) Testsuites {
 			testCases = append(testCases, *cond)
 		}
 	}
+	os.Setenv("SONAR_RESULT_NEW_ERRORS", fmt.Sprintf("%d", newErrors))  // Set the number of new errors as an environment variable
+	os.Setenv("SONAR_RESULT_OVERALL_ERRORS", fmt.Sprintf("%d", errors)) // Set the number of errors as an environment variable
 
 	dashboardLink := os.Getenv("PLUGIN_SONAR_HOST") + sonarDashStatic + os.Getenv("PLUGIN_SONAR_NAME")
 	SonarJunitReport := &Testsuites{

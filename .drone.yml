@@ -32,11 +32,11 @@ steps:
   #     ref:
   #       - refs/heads/main
   #       - refs/tags/**
-  - name: publish-v1.1.1
+  - name: publish-v1.2.0
     image: plugins/docker:20
     settings:
       auto_tag: true
-      auto_tag_suffix: v1.1.1
+      auto_tag_suffix: v1.2.0
       daemon_off: false
       dockerfile: Dockerfile
       password:
