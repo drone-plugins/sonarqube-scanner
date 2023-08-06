@@ -209,16 +209,16 @@ func displaySummary(total, passed, failed int) {
 	}
 
 	// Display the table
-	fmt.Println("-----------------------")
-	fmt.Printf("| STATUS       | COUNT |\n")
-	fmt.Println("-----------------------")
-	fmt.Printf("| PASSED (\033[32mGREEN\033[0m)   | %d   |\n", passed)
-	fmt.Println("-----------------------")
-	fmt.Printf("| FAILED (\033[31mRED\033[0m)     | %d   |\n", failed)
-	fmt.Println("-----------------------")
-	fmt.Printf("| TOTAL        | %d   |\n", total)
-	fmt.Println("-----------------------")
-	fmt.Printf("Categorization: %s\n", category)
+	fmt.Println("----------------------------------------------")
+	fmt.Printf("| STATUS                     | COUNT           |\n")
+	fmt.Println("----------------------------------------------")
+	fmt.Printf("| (\033[32mPASSED\033[0m)    | %d              |\n", passed)
+	fmt.Println("----------------------------------------------")
+	fmt.Printf("| (\033[31mFAILED\033[0m)    | %d              |\n", failed)
+	fmt.Println("----------------------------------------------")
+	fmt.Printf("| TOTAL                      | %d              |\n", total)
+	fmt.Println("----------------------------------------------")
+	fmt.Printf("\n\nCategorization: %s\n", category)
 }
 
 func ParseJunit(projectArray Project, projectName string) Testsuites {
