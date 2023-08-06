@@ -194,7 +194,7 @@ func TryCatch(f func()) func() error {
 }
 
 // displaySummary provides a colorful summary of the results in the terminal.
-func displaySummary(total, passed, failed int, errors int, newErrors int, projectJSON string) {
+func displaySummary(total, passed, failed int, errors int, newErrors int, projectJSON []byte) {
 	// Calculate the success rate
 	var successRate float64
 
