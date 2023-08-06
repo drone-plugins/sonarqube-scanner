@@ -247,7 +247,7 @@ func displaySummary(total, passed, failed int, errors int, newErrors int, projec
 		"SONAR_RESULT_FAILED":       fmt.Sprintf("%d", failed),
 		"SONAR_RESULT_ERRORS":       fmt.Sprintf("%d", errors),
 		"SONAR_RESULT_NEW_ERRORS":   fmt.Sprintf("%d", newErrors),
-		"SONAR_RESULT_JSON":         fmt.Sprintf("%d", projectJSON),
+		"SONAR_RESULT_JSON":         fmt.Sprintf("%d", string(projectJSON)),
 	}
 
 	// Write to the .env file
