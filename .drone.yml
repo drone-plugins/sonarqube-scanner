@@ -10,7 +10,7 @@ pool:
 
 steps:
   - name: pr test
-    image: plugins/docker:18
+    image: plugins/docker:20
     settings:
       daemon_off: false
       dockerfile: Dockerfile
@@ -33,7 +33,7 @@ steps:
   #       - refs/heads/main
   #       - refs/tags/**
   - name: publish-v1.1.1
-    image: plugins/docker:18
+    image: plugins/docker:20
     settings:
       auto_tag: true
       auto_tag_suffix: v1.1.1
