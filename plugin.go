@@ -1,10 +1,13 @@
 package main
 
 // Standard library imports
+// Standard library imports
 import (
 	"encoding/json"
 	"encoding/xml"
+	"encoding/xml"
 	"errors"
+	"fmt"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -13,19 +16,35 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"os"
+	"os/exec"
+	"strings"
 	"time"
 
 	"github.com/pelletier/go-toml"
 	"github.com/sirupsen/logrus"
+	"github.com/pelletier/go-toml"
+	"github.com/sirupsen/logrus"
 )
 
+// External library imports
 // External library imports
 
 // Global variables
 var (
 	// netClient is used for making HTTP requests.
 	netClient *http.Client
+// Global variables
+var (
+	// netClient is used for making HTTP requests.
+	netClient *http.Client
 
+	// projectKey represents the key of the project.
+	projectKey = ""
+
+	// sonarDashStatic is a static string used in the dashboard URL.
+	sonarDashStatic = "/dashboard?id="
+)
 	// projectKey represents the key of the project.
 	projectKey = ""
 
@@ -236,6 +255,9 @@ func ParseJunit(projectArray Project, projectName string) Testsuites {
 				Name:      condition.MetricKey,
 				Classname: "Violate if " + condition.ActualValue + " is " + condition.Comparator + " " + condition.ErrorThreshold,
 				Failure:   &Failure{Message: "Violated: " + condition.ActualValue + " is " + condition.Comparator + " " + condition.ErrorThreshold},
+				Name:      condition.MetricKey,
+				Classname: "Violate if " + condition.ActualValue + " is " + condition.Comparator + " " + condition.ErrorThreshold,
+				Failure:   &Failure{Message: "Violated: " + condition.ActualValue + " is " + condition.Comparator + " " + condition.ErrorThreshold},
 			}
 			testCases = append(testCases, *cond)
 		} else {
@@ -244,9 +266,15 @@ func ParseJunit(projectArray Project, projectName string) Testsuites {
 				Classname: "Violate if " + condition.ActualValue + " is " + condition.Comparator + " " + condition.ErrorThreshold,
 				Time:      0,
 			}
+			cond := &Testcase{
+				Name:      condition.MetricKey,
+				Classname: "Violate if " + condition.ActualValue + " is " + condition.Comparator + " " + condition.ErrorThreshold,
+				Time:      0,
+			}
 			testCases = append(testCases, *cond)
 		}
 	}
+
 
 	dashboardLink := os.Getenv("PLUGIN_SONAR_HOST") + sonarDashStatic + os.Getenv("PLUGIN_SONAR_NAME")
 	SonarJunitReport := &Testsuites{
