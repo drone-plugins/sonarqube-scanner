@@ -1,30 +1,37 @@
 package main
 
+// Standard library imports
 import (
-	"fmt"
-	"os"
-	"os/exec"
-	"strings"
-
-	"github.com/pelletier/go-toml"
-	"github.com/sirupsen/logrus"
-
 	"encoding/json"
+	"encoding/xml"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net"
 	"net/http"
 	"net/url"
+	"os"
+	"os/exec"
+	"strings"
 	"time"
 
-	"encoding/xml"
+	"github.com/pelletier/go-toml"
+	"github.com/sirupsen/logrus"
 )
 
-var netClient *http.Client
+// External library imports
 
-var projectKey = ""
+// Global variables
+var (
+	// netClient is used for making HTTP requests.
+	netClient *http.Client
 
-var sonarDashStatic = "/dashboard?id="
+	// projectKey represents the key of the project.
+	projectKey = ""
+
+	// sonarDashStatic is a static string used in the dashboard URL.
+	sonarDashStatic = "/dashboard?id="
+)
 
 type (
 	Config struct {
@@ -185,6 +192,35 @@ func TryCatch(f func()) func() error {
 		return err
 	}
 }
+
+// displaySummary provides a colorful summary of the results in the terminal.
+func displaySummary(total, passed, failed int) {
+	// Calculate the success rate
+	successRate := float64(passed) / float64(total) * 100
+
+	// Categorize the results
+	var category string
+	if successRate >= 90 {
+		category = "\033[32mExcellent\033[0m" // Green
+	} else if successRate >= 70 {
+		category = "\033[34mGood\033[0m" // Blue
+	} else {
+		category = "\033[31mNeeds Improvement\033[0m" // Red
+	}
+
+	// Display the table
+	fmt.Println("-----------------------")
+	fmt.Printf("| STATUS       | COUNT |\n")
+	fmt.Println("-----------------------")
+	fmt.Printf("| PASSED (\033[32mGREEN\033[0m)   | %d   |\n", passed)
+	fmt.Println("-----------------------")
+	fmt.Printf("| FAILED (\033[31mRED\033[0m)     | %d   |\n", failed)
+	fmt.Println("-----------------------")
+	fmt.Printf("| TOTAL        | %d   |\n", total)
+	fmt.Println("-----------------------")
+	fmt.Printf("Categorization: %s\n", category)
+}
+
 func ParseJunit(projectArray Project, projectName string) Testsuites {
 	errors := 0
 	total := 0
@@ -197,14 +233,21 @@ func ParseJunit(projectArray Project, projectName string) Testsuites {
 		if condition.Status != "OK" {
 			errors += 1
 			cond := &Testcase{
-				Name: condition.MetricKey, Classname: "Violate if " + condition.ActualValue + " is " + condition.Comparator + " " + condition.ErrorThreshold, Failure: &Failure{Message: "Violated: " + condition.ActualValue + " is " + condition.Comparator + " " + condition.ErrorThreshold},
+				Name:      condition.MetricKey,
+				Classname: "Violate if " + condition.ActualValue + " is " + condition.Comparator + " " + condition.ErrorThreshold,
+				Failure:   &Failure{Message: "Violated: " + condition.ActualValue + " is " + condition.Comparator + " " + condition.ErrorThreshold},
 			}
 			testCases = append(testCases, *cond)
 		} else {
-			cond := &Testcase{Name: condition.MetricKey, Classname: "Violate if " + condition.ActualValue + " is " + condition.Comparator + " " + condition.ErrorThreshold, Time: 0}
+			cond := &Testcase{
+				Name:      condition.MetricKey,
+				Classname: "Violate if " + condition.ActualValue + " is " + condition.Comparator + " " + condition.ErrorThreshold,
+				Time:      0,
+			}
 			testCases = append(testCases, *cond)
 		}
 	}
+
 	dashboardLink := os.Getenv("PLUGIN_SONAR_HOST") + sonarDashStatic + os.Getenv("PLUGIN_SONAR_NAME")
 	SonarJunitReport := &Testsuites{
 		TestSuite: []Testsuite{
@@ -220,6 +263,10 @@ func ParseJunit(projectArray Project, projectName string) Testsuites {
 	out, _ = xml.MarshalIndent(testCases, " ", "  ")
 	fmt.Println(string(out))
 	fmt.Printf("\n")
+
+	// Display the summary
+	passed := total - errors
+	displaySummary(total, passed, errors)
 
 	return *SonarJunitReport
 }
@@ -626,7 +673,7 @@ func GetProjectStatus(sonarHost string, analysisId string) ([]byte, error) {
 	fmt.Printf("URL:" + sonarHost + "/api/qualitygates/project_status?" + analysisId)
 
 	fmt.Printf("\n")
-	fmt.Printf("Setting Authorization header:" + token)
+	// fmt.Printf("Setting Authorization header:" + token)
 
 	projectRequest.Header.Add("Authorization", "Basic "+token)
 	projectResponse, err := netClient.Do(projectRequest)
