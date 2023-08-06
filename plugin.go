@@ -556,6 +556,8 @@ func (p Plugin) Exec() error {
 	fmt.Printf("\n==> Harness CIE SonarQube Plugin with Quality Gateway <==\n\n")
 	// "Docker", p.Config.ArtifactFile, (p.Config.Host + sonarDashStatic + p.Config.Name), "Sonar", "Harness Sonar Plugin", []string{"Diego", "latest"})
 
+	displayQualityGateStatus(status, p.Config.QualityEnabled == "true")
+
 	if status != p.Config.Quality && p.Config.QualityEnabled == "true" {
 		// fmt.Printf("\n==> QUALITY ENABLED ENALED  - set quality_gate_enabled as false to disable qg\n")
 		logrus.WithFields(logrus.Fields{
@@ -576,8 +578,6 @@ func (p Plugin) Exec() error {
 			"status": status,
 		}).Info("Quality Gate Status Success")
 	}
-
-	displayQualityGateStatus(status, p.Config.QualityEnabled == "true")
 
 	return nil
 }
