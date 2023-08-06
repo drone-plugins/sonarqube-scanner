@@ -194,9 +194,18 @@ func TryCatch(f func()) func() error {
 }
 
 // displaySummary provides a colorful summary of the results in the terminal.
-func displaySummary(total, passed, failed int) {
+func displaySummary(total, passed, failed int, errors int, newErrors int, projectJSON string) {
 	// Calculate the success rate
 	var successRate float64
+
+	// Get the path for DRONE_OUTPUT
+	droneOutputPath := os.Getenv("DRONE_OUTPUT")
+	if droneOutputPath == "" {
+		fmt.Print("\nError: DRONE_OUTPUT environment variable not set.\n")
+		fmt.Print("\nError: Probably you are not running in Harness or Drone.\n")
+		// return
+	}
+
 	if total != 0 {
 		successRate = float64(passed) / float64(total) * 100
 	} else {
@@ -229,12 +238,42 @@ func displaySummary(total, passed, failed int) {
 	fmt.Printf("|      TOTAL                 |      %d         |\n", total)
 	fmt.Println("----------------------------------------------")
 	fmt.Printf("\n\nCategorization: %s\n", category)
+
+	// Prepare your environment variables
+	vars := map[string]string{
+		"SONAR_RESULT_SUCCESS_RATE": fmt.Sprintf("%.2f", successRate),
+		"SONAR_RESULT_TOTAL":        fmt.Sprintf("%d", total),
+		"SONAR_RESULT_PASSED":       fmt.Sprintf("%d", passed),
+		"SONAR_RESULT_FAILED":       fmt.Sprintf("%d", failed),
+		"SONAR_RESULT_ERRORS":       fmt.Sprintf("%d", errors),
+		"SONAR_RESULT_NEW_ERRORS":   fmt.Sprintf("%d", newErrors),
+		"SONAR_RESULT_JSON":         fmt.Sprintf("%d", projectJSON),
+	}
+
+	// Write to the .env file
+	filePath := fmt.Sprintf("%s/.env", droneOutputPath)
+	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		fmt.Println("Error opening/creating .env file:", err)
+		return
+	}
+	defer file.Close()
+
+	for key, value := range vars {
+		_, err = file.WriteString(fmt.Sprintf("%s=%s\n", key, value))
+		if err != nil {
+			fmt.Println("Error writing to .env file:", err)
+			return
+		}
+	}
+
 }
 
 func ParseJunit(projectArray Project, projectName string) Testsuites {
-	errors := 0
+	failed := 0
 	total := 0
 	testCases := []Testcase{}
+	errors := 0
 	newErrors := 0
 
 	conditionsArray := projectArray.ProjectStatus.Conditions
@@ -242,16 +281,12 @@ func ParseJunit(projectArray Project, projectName string) Testsuites {
 	for _, condition := range conditionsArray {
 		total += 1
 		if condition.Status != "OK" {
-			errors += 1
+			failed += 1
 			// Check if the metricKey starts with "new_"
 			if strings.HasPrefix(condition.MetricKey, "new_") {
-				if condition.Status != "OK" {
-					newErrors += 1
-				}
+				newErrors += 1
 			} else {
-				if condition.Status != "OK" {
-					errors += 1
-				}
+				errors += 1
 			}
 			cond := &Testcase{
 				Name:      condition.MetricKey,
@@ -289,7 +324,14 @@ func ParseJunit(projectArray Project, projectName string) Testsuites {
 
 	// Display the summary
 	passed := total - errors
-	displaySummary(total, passed, errors)
+
+	projectJSON, err := json.Marshal(projectArray)
+	if err != nil {
+		fmt.Println("Error marshalling project to JSON:", err)
+		// Handle error or return something meaningful
+	}
+
+	displaySummary(total, passed, failed, errors, newErrors, projectJSON)
 
 	return *SonarJunitReport
 }
