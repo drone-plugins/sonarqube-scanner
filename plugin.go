@@ -291,6 +291,18 @@ func writeEnvFile(vars map[string]string, outputPath string) error {
 		return err
 	}
 	fmt.Println("Successfully wrote to .env file")
+
+	// Read the file contents
+	content, err := ioutil.ReadFile(outputPath)
+	if err != nil {
+		fmt.Println("Error reading the .env file:", err)
+		return err
+	}
+
+	// Print the file contents
+	fmt.Println("File contents:")
+	fmt.Println(string(content))
+
 	return nil
 }
 
