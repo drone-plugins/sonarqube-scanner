@@ -15,6 +15,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/joho/godotenv"
 	"github.com/pelletier/go-toml"
 	"github.com/sirupsen/logrus"
 )
@@ -75,6 +76,9 @@ type (
 		CustomJvmParams           string
 		TaskId                    string
 	}
+	Output struct {
+		OutputFile string // File where plugin output are saved
+	}
 	// SonarReport it is the representation of .scannerwork/report-task.txt //
 	SonarReport struct {
 		ProjectKey   string `toml:"projectKey"`
@@ -85,6 +89,7 @@ type (
 	}
 	Plugin struct {
 		Config Config
+		Output Output // Output file content
 	}
 	// TaskResponse Give Compute Engine task details such as type, status, duration and associated component.
 	TaskResponse struct {
@@ -241,22 +246,28 @@ func displaySummary(total, passed, failed int, errors int, newErrors int, projec
 
 	// Write to the .env file
 	filePath := fmt.Sprintf("%s", droneOutputPath)
-	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	err := writeEnvFile(vars, filePath)
 	if err != nil {
-		fmt.Println("Error opening/creating .env file:", err)
+		fmt.Println("Error writing to .env file:", err)
 		// return
 	}
+	// file, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	// if err != nil {
+	// 	fmt.Println("Error opening/creating .env file:", err)
+	// 	// return
+	// }
 
-	for key, value := range vars {
-		fmt.Println("Writing to .env file:", key, value)
-		_, err = file.WriteString(fmt.Sprintf("%s=%s\n", key, value))
-		if err != nil {
-			fmt.Println("Error writing to .env file:", err)
-			// return
-		}
-	}
+	// for key, value := range vars {
+	// 	fmt.Println("Writing to .env file:", key, value)
+	// 	_, err = file.WriteString(fmt.Sprintf("%s=%s\n", key, value))
+	// 	if err != nil {
+	// 		fmt.Println("Error writing to .env file:", err)
+	// 		// return
+	// 	}
+	// }
+
 	fmt.Println("Successfully wrote to .env file")
-	defer file.Close()
+	// defer file.Close()
 	fmt.Println("Successfully closed .env file")
 	fmt.Print("\n\n")
 	// Display the table
@@ -270,6 +281,17 @@ func displaySummary(total, passed, failed int, errors int, newErrors int, projec
 	fmt.Printf("|      TOTAL                 |      %d         |\n", total)
 	fmt.Println("----------------------------------------------")
 	fmt.Printf("\n\nCategorization: %s\n", category)
+}
+
+func writeEnvFile(vars map[string]string, outputPath string) error {
+	// Use godotenv.Write() to write the vars map to the specified file
+	err := godotenv.Write(vars, outputPath)
+	if err != nil {
+		fmt.Println("Error writing to .env file:", err)
+		return err
+	}
+	fmt.Println("Successfully wrote to .env file")
+	return nil
 }
 
 func ParseJunit(projectArray Project, projectName string) Testsuites {
@@ -343,113 +365,184 @@ func GetProjectKey(key string) string {
 }
 
 func (p Plugin) Exec() error {
-
+	// Initial values
 	args := []string{
 		"-Dsonar.host.url=" + p.Config.Host,
 		"-Dsonar.login=" + p.Config.Token,
 	}
-	projectFinalKey := p.Config.Key
 
+	// Map of potential configurations
+	configurations := map[string]string{
+		"-Dsonar.projectKey":                        p.Config.Key,
+		"-Dsonar.projectName":                       p.Config.Name,
+		"-Dsonar.projectVersion":                    p.Config.Version,
+		"-Dsonar.sources":                           p.Config.Sources,
+		"-Dsonar.ws.timeout":                        p.Config.Timeout,
+		"-Dsonar.inclusions":                        p.Config.Inclusions,
+		"-Dsonar.exclusions":                        p.Config.Exclusions,
+		"-Dsonar.log.level":                         p.Config.Level,
+		"-Dsonar.showProfiling":                     p.Config.ShowProfiling,
+		"-Dsonar.java.binaries":                     p.Config.Binaries,
+		"-Dsonar.branch.name":                       p.Config.Branch,
+		"-Dsonar.qualitygate.wait":                  p.Config.QualityEnabled,
+		"-Dsonar.qualitygate.timeout":               p.Config.QualityTimeout,
+		"-Dsonar.javascript.lcov.reportPaths":       p.Config.JavascitptIcovReport,
+		"-Dsonar.coverage.jacoco.xmlReportPaths":    p.Config.JacocoReportPath,
+		"-Dsonar.java.coveragePlugin":               p.Config.JavaCoveragePlugin,
+		"-Dsonar.junit.reportPaths":                 p.Config.JunitReportPaths,
+		"-Dsonar.sourceEncoding":                    p.Config.SourceEncoding,
+		"-Dsonar.tests":                             p.Config.SonarTests,
+		"-Dsonar.java.test.binaries":                p.Config.JavaTest,
+		"-Dsonar.coverage.exclusions":               p.Config.CoverageExclusion,
+		"-Dsonar.java.source":                       p.Config.JavaSource,
+		"-Dsonar.java.libraries":                    p.Config.JavaLibraries,
+		"-Dsonar.surefire.reportsPath":              p.Config.SurefireReportsPath,
+		"-Dsonar.sonar.typescript.lcov.reportPaths": p.Config.TypescriptLcovReportPaths,
+		"-Dsonar.verbose":                           p.Config.Verbose,
+		"-Dsonar.pullrequest.key":                   p.Config.PRKey,
+		"-Dsonar.pullrequest.branch":                p.Config.PRBranch,
+		"-Dsonar.pullrequest.base":                  p.Config.PRBase,
+		"-Djavax.net.ssl.trustStorePassword":        p.Config.SSLKeyStorePassword,
+		"-Djavax.net.ssl.trustStore":                p.Config.CacertsLocation,
+	}
+
+	// Loop over the configurations and add to args if they exist
+	for config, value := range configurations {
+		if len(value) >= 1 {
+			args = append(args, config+"="+value)
+		}
+	}
+
+	// Special conditions
 	if len(p.Config.Verbose) >= 1 {
 		args = append(args, "-X")
 	}
 
 	if !p.Config.UsingProperties {
-		argsParameter := []string{
-			"-Dsonar.projectKey=" + projectFinalKey,
-			"-Dsonar.projectName=" + p.Config.Name,
-			"-Dsonar.projectVersion=" + p.Config.Version,
-			"-Dsonar.sources=" + p.Config.Sources,
-			"-Dsonar.ws.timeout=" + p.Config.Timeout,
-			"-Dsonar.inclusions=" + p.Config.Inclusions,
-			"-Dsonar.exclusions=" + p.Config.Exclusions,
-			"-Dsonar.log.level=" + p.Config.Level,
-			"-Dsonar.showProfiling=" + p.Config.ShowProfiling,
-			"-Dsonar.scm.provider=git",
-			"-Dsonar.java.binaries=" + p.Config.Binaries,
-		}
-		args = append(args, argsParameter...)
-	}
-	if p.Config.BranchAnalysis {
-		args = append(args, "-Dsonar.branch.name="+p.Config.Branch)
-	}
-	if p.Config.QualityEnabled == "true" {
-		args = append(args, "-Dsonar.qualitygate.wait="+p.Config.QualityEnabled)
-		args = append(args, "-Dsonar.qualitygate.timeout="+p.Config.QualityTimeout)
-	}
-	if len(p.Config.JavascitptIcovReport) >= 1 {
-		args = append(args, "-Dsonar.javascript.lcov.reportPaths="+p.Config.JavascitptIcovReport)
-	}
-	if len(p.Config.JacocoReportPath) >= 1 {
-		args = append(args, "-Dsonar.coverage.jacoco.xmlReportPaths="+p.Config.JacocoReportPath)
-		fmt.Printf("\n\n==> Sonar Java Plugin Jacoco configured!\n\n")
-		fmt.Printf("\n\n==> -Dsonar.coverage.jacoco.xmlReportPaths=" + p.Config.JacocoReportPath + "\n\n")
-	}
-	if len(p.Config.JavaCoveragePlugin) >= 1 {
-		args = append(args, "-Dsonar.java.coveragePlugin="+p.Config.JavaCoveragePlugin)
-		fmt.Printf("\n\n==> Sonar Java Plugin Jacoco Path configured!\n\n")
-	}
-	if len(p.Config.JunitReportPaths) >= 1 {
-		args = append(args, "-Dsonar.junit.reportPaths="+p.Config.JunitReportPaths)
-	}
-	if len(p.Config.SourceEncoding) >= 1 {
-		args = append(args, "-Dsonar.sourceEncoding="+p.Config.SourceEncoding)
-	}
-	if len(p.Config.SonarTests) >= 1 {
-		args = append(args, "-Dsonar.tests="+p.Config.SonarTests)
-	}
-	if len(p.Config.JavaTest) >= 1 {
-		args = append(args, "-Dsonar.java.test.binaries="+p.Config.JavaTest)
-	}
-	if len(p.Config.CoverageExclusion) >= 1 {
-		args = append(args, "-Dsonar.coverage.exclusions="+p.Config.CoverageExclusion)
-	}
-	if len(p.Config.JavaSource) >= 1 {
-		args = append(args, "-Dsonar.java.source="+p.Config.JavaSource)
-	}
-	if len(p.Config.JavaLibraries) >= 1 {
-		args = append(args, "-Dsonar.java.libraries="+p.Config.JavaLibraries)
-	}
-	if len(p.Config.SurefireReportsPath) >= 1 {
-		args = append(args, "-Dsonar.surefire.reportsPath="+p.Config.SurefireReportsPath)
-	}
-	if len(p.Config.TypescriptLcovReportPaths) >= 1 {
-		args = append(args, "-Dsonar.sonar.typescript.lcov.reportPaths="+p.Config.TypescriptLcovReportPaths)
-	}
-	if len(p.Config.Verbose) >= 1 {
-		args = append(args, "-Dsonar.verbose="+p.Config.Verbose)
+		args = append(args, "-Dsonar.scm.provider=git")
 	}
 
 	if len(p.Config.CustomJvmParams) >= 1 {
-
 		params := strings.Split(p.Config.CustomJvmParams, ",")
-
-		for _, param := range params {
-			//fmt.Println(i, param)
-			args = append(args, param)
-		}
-
+		args = append(args, params...)
 	}
 
-	if len(p.Config.PRKey) >= 1 {
-		args = append(args, "-Dsonar.pullrequest.key="+p.Config.PRKey)
+	// Assuming your struct has a print or log method
+	if len(p.Config.JacocoReportPath) >= 1 {
+		fmt.Printf("\n\n==> Sonar Java Plugin Jacoco configured!\n\n")
+		fmt.Printf("\n\n==> -Dsonar.coverage.jacoco.xmlReportPaths=" + p.Config.JacocoReportPath + "\n\n")
 	}
 
-	if len(p.Config.PRBranch) >= 1 {
-		args = append(args, "-Dsonar.pullrequest.branch="+p.Config.PRBranch)
+	if len(p.Config.JavaCoveragePlugin) >= 1 {
+		fmt.Printf("\n\n==> Sonar Java Plugin Jacoco Path configured!\n\n")
 	}
 
-	if len(p.Config.PRBase) >= 1 {
-		args = append(args, "-Dsonar.pullrequest.base="+p.Config.PRBase)
-	}
+	// args := []string{
+	// 	"-Dsonar.host.url=" + p.Config.Host,
+	// 	"-Dsonar.login=" + p.Config.Token,
+	// }
+	// projectFinalKey := p.Config.Key
 
-	if len(p.Config.SSLKeyStorePassword) >= 1 {
-		args = append(args, "-Djavax.net.ssl.trustStorePassword="+p.Config.SSLKeyStorePassword)
-	}
+	// if len(p.Config.Verbose) >= 1 {
+	// 	args = append(args, "-X")
+	// }
 
-	if len(p.Config.CacertsLocation) >= 1 {
-		args = append(args, "-Djavax.net.ssl.trustStore="+p.Config.CacertsLocation)
-	}
+	// if !p.Config.UsingProperties {
+	// 	argsParameter := []string{
+	// 		"-Dsonar.projectKey=" + projectFinalKey,
+	// 		"-Dsonar.projectName=" + p.Config.Name,
+	// 		"-Dsonar.projectVersion=" + p.Config.Version,
+	// 		"-Dsonar.sources=" + p.Config.Sources,
+	// 		"-Dsonar.ws.timeout=" + p.Config.Timeout,
+	// 		"-Dsonar.inclusions=" + p.Config.Inclusions,
+	// 		"-Dsonar.exclusions=" + p.Config.Exclusions,
+	// 		"-Dsonar.log.level=" + p.Config.Level,
+	// 		"-Dsonar.showProfiling=" + p.Config.ShowProfiling,
+	// 		"-Dsonar.scm.provider=git",
+	// 		"-Dsonar.java.binaries=" + p.Config.Binaries,
+	// 	}
+	// 	args = append(args, argsParameter...)
+	// }
+	// if p.Config.BranchAnalysis {
+	// 	args = append(args, "-Dsonar.branch.name="+p.Config.Branch)
+	// }
+	// if p.Config.QualityEnabled == "true" {
+	// 	args = append(args, "-Dsonar.qualitygate.wait="+p.Config.QualityEnabled)
+	// 	args = append(args, "-Dsonar.qualitygate.timeout="+p.Config.QualityTimeout)
+	// }
+	// if len(p.Config.JavascitptIcovReport) >= 1 {
+	// 	args = append(args, "-Dsonar.javascript.lcov.reportPaths="+p.Config.JavascitptIcovReport)
+	// }
+	// if len(p.Config.JacocoReportPath) >= 1 {
+	// 	args = append(args, "-Dsonar.coverage.jacoco.xmlReportPaths="+p.Config.JacocoReportPath)
+	// 	fmt.Printf("\n\n==> Sonar Java Plugin Jacoco configured!\n\n")
+	// 	fmt.Printf("\n\n==> -Dsonar.coverage.jacoco.xmlReportPaths=" + p.Config.JacocoReportPath + "\n\n")
+	// }
+	// if len(p.Config.JavaCoveragePlugin) >= 1 {
+	// 	args = append(args, "-Dsonar.java.coveragePlugin="+p.Config.JavaCoveragePlugin)
+	// 	fmt.Printf("\n\n==> Sonar Java Plugin Jacoco Path configured!\n\n")
+	// }
+	// if len(p.Config.JunitReportPaths) >= 1 {
+	// 	args = append(args, "-Dsonar.junit.reportPaths="+p.Config.JunitReportPaths)
+	// }
+	// if len(p.Config.SourceEncoding) >= 1 {
+	// 	args = append(args, "-Dsonar.sourceEncoding="+p.Config.SourceEncoding)
+	// }
+	// if len(p.Config.SonarTests) >= 1 {
+	// 	args = append(args, "-Dsonar.tests="+p.Config.SonarTests)
+	// }
+	// if len(p.Config.JavaTest) >= 1 {
+	// 	args = append(args, "-Dsonar.java.test.binaries="+p.Config.JavaTest)
+	// }
+	// if len(p.Config.CoverageExclusion) >= 1 {
+	// 	args = append(args, "-Dsonar.coverage.exclusions="+p.Config.CoverageExclusion)
+	// }
+	// if len(p.Config.JavaSource) >= 1 {
+	// 	args = append(args, "-Dsonar.java.source="+p.Config.JavaSource)
+	// }
+	// if len(p.Config.JavaLibraries) >= 1 {
+	// 	args = append(args, "-Dsonar.java.libraries="+p.Config.JavaLibraries)
+	// }
+	// if len(p.Config.SurefireReportsPath) >= 1 {
+	// 	args = append(args, "-Dsonar.surefire.reportsPath="+p.Config.SurefireReportsPath)
+	// }
+	// if len(p.Config.TypescriptLcovReportPaths) >= 1 {
+	// 	args = append(args, "-Dsonar.sonar.typescript.lcov.reportPaths="+p.Config.TypescriptLcovReportPaths)
+	// }
+	// if len(p.Config.Verbose) >= 1 {
+	// 	args = append(args, "-Dsonar.verbose="+p.Config.Verbose)
+	// }
+
+	// if len(p.Config.CustomJvmParams) >= 1 {
+
+	// 	params := strings.Split(p.Config.CustomJvmParams, ",")
+
+	// 	for _, param := range params {
+	// 		//fmt.Println(i, param)
+	// 		args = append(args, param)
+	// 	}
+
+	// }
+
+	// if len(p.Config.PRKey) >= 1 {
+	// 	args = append(args, "-Dsonar.pullrequest.key="+p.Config.PRKey)
+	// }
+
+	// if len(p.Config.PRBranch) >= 1 {
+	// 	args = append(args, "-Dsonar.pullrequest.branch="+p.Config.PRBranch)
+	// }
+
+	// if len(p.Config.PRBase) >= 1 {
+	// 	args = append(args, "-Dsonar.pullrequest.base="+p.Config.PRBase)
+	// }
+
+	// if len(p.Config.SSLKeyStorePassword) >= 1 {
+	// 	args = append(args, "-Djavax.net.ssl.trustStorePassword="+p.Config.SSLKeyStorePassword)
+	// }
+
+	// if len(p.Config.CacertsLocation) >= 1 {
+	// 	args = append(args, "-Djavax.net.ssl.trustStore="+p.Config.CacertsLocation)
+	// }
 
 	os.Setenv("SONAR_USER_HOME", ".sonar")
 
@@ -584,13 +677,13 @@ func (p Plugin) Exec() error {
 
 func displayQualityGateStatus(status string, qualityEnabled bool) {
 	fmt.Println("----------------------------------------------")
-	fmt.Printf("|        QUALITY GATE STATUS  |     STATUS     |\n")
+	fmt.Printf("|         QUALITY GATE STATUS REPORT           |\n")
 	fmt.Println("----------------------------------------------")
 
 	if status == "SUCCESS" {
-		fmt.Printf("|         (\033[32mPASSED\033[0m)              |      \033[32m%s\033[0m       |\n", status)
+		fmt.Printf("|         STATUS              |      \033[32m%s\033[0m       |\n", status)
 	} else {
-		fmt.Printf("|         (\033[31mFAILED\033[0m)              |      \033[31m%s\033[0m       |\n", status)
+		fmt.Printf("|         STATUS              |      \033[31m%s\033[0m       |\n", status)
 	}
 
 	fmt.Println("----------------------------------------------")
@@ -601,6 +694,9 @@ func displayQualityGateStatus(status string, qualityEnabled bool) {
 		fmt.Printf("|      QUALITY GATE ENABLED   |       \033[31mNO\033[0m        |\n")
 	}
 
+	fmt.Printf("----------------------------------------------\n\n")
+	fmt.Println("----------------------------------------------")
+	fmt.Printf("|         Developed by: Diego Pereira          |\n")
 	fmt.Println("----------------------------------------------")
 }
 
