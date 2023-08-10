@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/joho/godotenv v1.5.1
-	github.com/pelletier/go-toml v1.9.5
+	github.com/pelletier/go-toml/v2 v2.0.9
 	github.com/pelletier/go-toml/v2 v2.0.9
 	github.com/sirupsen/logrus v1.9.3
 	github.com/urfave/cli v1.22.14
