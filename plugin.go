@@ -75,6 +75,7 @@ type (
 		Verbose                   string
 		CustomJvmParams           string
 		TaskId                    string
+		SkipScan                  bool
 	}
 	Output struct {
 		OutputFile string // File where plugin output are saved
@@ -570,7 +571,7 @@ func (p Plugin) Exec() error {
 
 	status := ""
 
-	if p.Config.TaskId != "" {
+	if p.Config.TaskId != "" || !p.Config.SkipScan {
 		fmt.Printf("Skipping Scan...")
 		fmt.Printf("\n")
 		fmt.Printf("\n")
@@ -692,7 +693,7 @@ func displayQualityGateStatus(status string, qualityEnabled bool) {
 	fmt.Printf("|         QUALITY GATE STATUS REPORT           |\n")
 	fmt.Println("----------------------------------------------")
 
-	if status == "SUCCESS" {
+	if status == "OK" {
 		fmt.Printf("|         STATUS              |      \033[32m%s\033[0m       |\n", status)
 	} else {
 		fmt.Printf("|         STATUS              |      \033[31m%s\033[0m       |\n", status)
