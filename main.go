@@ -244,6 +244,11 @@ func main() {
 			Value:  "",
 			EnvVar: "PLUGIN_TASKID",
 		},
+		cli.BoolFlag{
+			Name:   "skip_scan",
+			Usage:  "Skip the SonarQube scan",
+			EnvVar: "PLUGIN_SKIP_SCAN",
+		},
 	}
 	app.Run(os.Args)
 }
@@ -289,6 +294,7 @@ func run(c *cli.Context) {
 			Verbose:                   c.String("verbose"),
 			CustomJvmParams:           c.String("custom_jvm_params"),
 			TaskId:                    c.String("taskid"),
+			SkipScan:                  c.Bool("skip_scan"),
 		},
 		Output: Output{
 			OutputFile: c.String("output-file"),
