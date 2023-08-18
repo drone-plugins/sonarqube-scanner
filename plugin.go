@@ -571,7 +571,7 @@ func (p Plugin) Exec() error {
 
 	status := ""
 
-	if p.Config.TaskId != "" || !p.Config.SkipScan {
+	if p.Config.TaskId != "" || p.Config.SkipScan {
 		fmt.Printf("Skipping Scan...")
 		fmt.Printf("\n")
 		fmt.Printf("\n")

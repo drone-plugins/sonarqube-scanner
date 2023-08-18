@@ -2,7 +2,7 @@
 
 This plugin is designed to run SonarQube scans and handle the results and convert it to JUnit Format. It's written in Go and check the report results for status OK.
 
-## Main Features - 2.0.0
+## Main Features - 2.0.1
 
 - Execute SonarQube scans and handle the results
 - Generate JUnit reports based on the scan results
@@ -20,7 +20,7 @@ This plugin is designed to run SonarQube scans and handle the results and conver
     identifier: run_sonar
     spec:
         connectorRef: account.DockerHubDiego
-        image: plugins/sonarqube-scanner:2.0.0
+        image: plugins/sonarqube-scanner:2.0.1
         reports:
             type: JUnit
             spec:
@@ -42,7 +42,7 @@ This plugin is designed to run SonarQube scans and handle the results and conver
 type: Plugin
 spec:
     connectorRef: <+input>
-    image: plugins/sonarqube-scanner:2.0.0
+    image: plugins/sonarqube-scanner:2.0.1
     reports:
         type: JUnit
         spec:
@@ -82,7 +82,7 @@ spec:
     identifier: run_sonar
     spec:
         connectorRef: account.DockerHubDiego
-        image: plugins/sonarqube-scanner:2.0.0
+        image: plugins/sonarqube-scanner:2.0.1
         reports:
             type: JUnit
             spec:
