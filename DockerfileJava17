@@ -19,9 +19,11 @@ ARG SONAR_VERSION=5.0.1.3006
 ARG SONAR_SCANNER_CLI=sonar-scanner-cli-${SONAR_VERSION}
 ARG SONAR_SCANNER=sonar-scanner-${SONAR_VERSION}
 
-RUN apt-get update \
-    && apt-get install -y nodejs curl \
-    && apt-get clean
+# RUN apt-get update \
+#     && apt-get install -y nodejs curl \
+#     && apt-get clean
+
+RUN apk --no-cache add nodejs curl unzip
 
 COPY --from=build /go/src/github.com/diegopereiraeng/harness-cie-sonarqube-scanner/harness-sonar /bin/
 WORKDIR /bin
