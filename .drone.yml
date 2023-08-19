@@ -9,13 +9,6 @@ pool:
   use: ubuntu
 
 steps:
-  - name: pr tests
-    image: plugins/docker:20
-    commands:
-      - echo "Running PR Tests in parallel"
-    depends_on:
-      - pr test java 11
-      - pr test java 17
   - name: pr test java 11
     image: plugins/docker:20
     settings:
