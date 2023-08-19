@@ -962,6 +962,11 @@ func GetLatestTaskID(sonarHost string, projectSlug string) (string, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
+		if resp.StatusCode == http.StatusForbidden {
+			fmt.Printf("\nError in Task discovery: %s\n", "Check your token permission - probably it does not have 'Browse' permission on the project")
+		} else if resp.StatusCode == http.StatusUnauthorized {
+			fmt.Printf("\nError in Task discovery: %s\n", "Invalid Credentials - your token is not valid")
+		}
 		return "", fmt.Errorf("HTTP request error. Status code: %d", resp.StatusCode)
 	}
 
