@@ -2,7 +2,7 @@
 
 This plugin is designed to run SonarQube scans and handle the results and convert it to JUnit Format. It's written in Go and check the report results for status OK.
 
-## Main Features - 2.0.1
+## Main Features - v2.0.2-java17
 
 - Execute SonarQube scans and handle the results
 - Generate JUnit reports based on the scan results
@@ -20,7 +20,7 @@ This plugin is designed to run SonarQube scans and handle the results and conver
     identifier: run_sonar
     spec:
         connectorRef: account.DockerHubDiego
-        image: plugins/sonarqube-scanner:2.0.1
+        image: plugins/sonarqube-scanner:v2.0.2-java17
         reports:
             type: JUnit
             spec:
@@ -42,7 +42,7 @@ This plugin is designed to run SonarQube scans and handle the results and conver
 type: Plugin
 spec:
     connectorRef: <+input>
-    image: plugins/sonarqube-scanner:2.0.1
+    image: plugins/sonarqube-scanner:v2.0.2-java17
     reports:
         type: JUnit
         spec:
@@ -78,11 +78,11 @@ spec:
 ```yaml
 - step:
     type: Plugin
-    name: "Check Sonar "
-    identifier: run_sonar
+    name: "Check Sonar Quality Gate"
+    identifier: check_sonar
     spec:
         connectorRef: account.DockerHubDiego
-        image: plugins/sonarqube-scanner:2.0.1
+        image: plugins/sonarqube-scanner:v2.0.2-java17
         reports:
             type: JUnit
             spec:
@@ -91,9 +91,9 @@ spec:
         privileged: false
         settings:
             sonar_host: https://sonarcloud.io
-            sonar_token: 66778345cea1a31d817f0deee3daa7868c431433
-            sonar_name: sonarqube-scanner
-            sonar_key: sonarqube-scanner
+            sonar_token: 66778345yourToken817f0deee3daa7868c431433
+            sonar_name: sonar-project-name
+            sonar_key: sonar-project-key
             skip_scan: true
 ```
 
