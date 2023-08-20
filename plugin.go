@@ -886,8 +886,11 @@ func GetProjectStatus(sonarHost string, analysisId string) ([]byte, error) {
 
 	fmt.Printf("\n")
 	// fmt.Printf("Setting Authorization header:" + token)
+	// Retry with the token encoded in base64
+	encodedToken := base64.StdEncoding.EncodeToString([]byte(token))
+	projectRequest.Header.Set("Authorization", "Basic "+encodedToken)
 
-	projectRequest.Header.Add("Authorization", "Basic "+token)
+	// projectRequest.Header.Add("Authorization", "Basic "+token)
 	projectResponse, err := netClient.Do(projectRequest)
 
 	if err != nil {
@@ -912,13 +915,14 @@ func GetProjectStatus(sonarHost string, analysisId string) ([]byte, error) {
 		projectBearerResponse, err := netClient.Do(projectBearerRequest)
 		if err != nil {
 			fmt.Printf("\n")
-			fmt.Printf("Error getting project status, trying again with bearer token...")
+			fmt.Printf("NIL - Error getting project status, trying again with bearer token...")
 			return nil, err
 		}
 		fmt.Printf("Response Code with Bearer:" + projectBearerResponse.Status)
 		if projectBearerResponse.StatusCode == 401 {
 			fmt.Printf("\n")
 			fmt.Printf("Error getting project status, trying again with bearer token...")
+
 			return nil, fmt.Errorf("unauthorized to get project status")
 		}
 		bufResponse, err := ioutil.ReadAll(projectBearerResponse.Body)
@@ -980,6 +984,8 @@ func GetLatestTaskID(sonarHost string, projectSlug string) (string, error) {
 		fmt.Printf("Retrying with encoded token...\n")
 
 		encodedToken := base64.StdEncoding.EncodeToString([]byte(sonarToken))
+		req.Header.Add("Authorization", "Basic "+encodedToken)
+		fmt.Printf("Token encoded: %s\n", encodedToken)
 		req.SetBasicAuth(encodedToken, "")
 		resp, err = netClient.Do(req)
 		if err != nil {
