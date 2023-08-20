@@ -904,7 +904,7 @@ func GetProjectStatus(sonarHost string, analysisId string) ([]byte, error) {
 
 	}
 	fmt.Printf("Response Code:" + projectResponse.Status)
-	// buf := []byte{}
+	buf := []byte{}
 	// if status code 401 try again with bearer token
 	if projectResponse.StatusCode == 401 {
 		bearer := "Bearer " + token
