@@ -33,6 +33,9 @@ var (
 
 	// sonarDashStatic is a static string used in the dashboard URL.
 	sonarDashStatic = "/dashboard?id="
+
+	// basicAuth is the basic authentication string.
+	basicAuth = "Basic "
 )
 
 type (
@@ -743,7 +746,7 @@ func getStatus(task *TaskResponse, report *SonarReport) string {
 	}
 	sonarToken := os.Getenv("PLUGIN_SONAR_TOKEN")
 	projectRequest, err := http.NewRequest("GET", report.ServerURL+"/api/qualitygates/project_status?"+reportRequest.Encode(), nil)
-	projectRequest.Header.Add("Authorization", "Basic "+sonarToken)
+	projectRequest.Header.Add("Authorization", basicAuth+sonarToken)
 	projectResponse, err := netClient.Do(projectRequest)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
@@ -817,7 +820,7 @@ func getStatusID(taskIDOld string, sonarHost string, projectSlug string) (string
 	fmt.Printf("\n")
 
 	// projectRequest, err := http.NewRequest("GET", sonarHost+"/api/qualitygates/project_status?"+reportRequest.Encode(), nil)
-	// projectRequest.Header.Add("Authorization", "Basic "+token)
+	// projectRequest.Header.Add("Authorization", basicAuth+token)
 	// projectResponse, err := netClient.Do(projectRequest)
 	// if err != nil {
 	// 	logrus.WithFields(logrus.Fields{
@@ -888,20 +891,20 @@ func GetProjectStatus(sonarHost string, analysisId string) ([]byte, error) {
 	// fmt.Printf("Setting Authorization header:" + token)
 	// Retry with the token encoded in base64
 	encodedToken := base64.StdEncoding.EncodeToString([]byte(token))
-	projectRequest.Header.Set("Authorization", "Basic "+encodedToken)
+	projectRequest.Header.Set("Authorization", basicAuth+encodedToken)
 
-	// projectRequest.Header.Add("Authorization", "Basic "+token)
+	// projectRequest.Header.Add("Authorization", basicAuth+token)
 	projectResponse, err := netClient.Do(projectRequest)
 
 	if err != nil {
 		fmt.Printf("\n")
-		fmt.Printf("NIL - Error getting project status, trying again with bearer token...")
+		fmt.Printf("NIL - Error getting project status, failed!")
 
 		return nil, err
 
 	}
 	fmt.Printf("Response Code:" + projectResponse.Status)
-	buf := []byte{}
+	// buf := []byte{}
 	// if status code 401 try again with bearer token
 	if projectResponse.StatusCode == 401 {
 		bearer := "Bearer " + token
@@ -984,7 +987,7 @@ func GetLatestTaskID(sonarHost string, projectSlug string) (string, error) {
 		fmt.Printf("Retrying with encoded token...\n")
 
 		encodedToken := base64.StdEncoding.EncodeToString([]byte(sonarToken))
-		req.Header.Add("Authorization", "Basic "+encodedToken)
+		req.Header.Add("Authorization", basicAuth+encodedToken)
 		fmt.Printf("Token encoded: %s\n", encodedToken)
 		req.SetBasicAuth(encodedToken, "")
 		resp, err = netClient.Do(req)
@@ -1032,7 +1035,7 @@ func GetLatestTaskID(sonarHost string, projectSlug string) (string, error) {
 func getSonarJobStatus(report *SonarReport) *TaskResponse {
 
 	taskRequest, err := http.NewRequest("GET", report.CeTaskURL, nil)
-	taskRequest.Header.Add("Authorization", "Basic "+os.Getenv("PLUGIN_SONAR_TOKEN"))
+	taskRequest.Header.Add("Authorization", basicAuth+os.Getenv("PLUGIN_SONAR_TOKEN"))
 	taskResponse, err := netClient.Do(taskRequest)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
