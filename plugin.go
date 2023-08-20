@@ -2,6 +2,7 @@ package main
 
 // Standard library imports
 import (
+	"encoding/base64"
 	"encoding/json"
 	"encoding/xml"
 	"errors"
@@ -740,13 +741,25 @@ func getStatus(task *TaskResponse, report *SonarReport) string {
 	reportRequest := url.Values{
 		"analysisId": {task.Task.AnalysisID},
 	}
+	sonarToken := os.Getenv("PLUGIN_SONAR_TOKEN")
 	projectRequest, err := http.NewRequest("GET", report.ServerURL+"/api/qualitygates/project_status?"+reportRequest.Encode(), nil)
-	projectRequest.Header.Add("Authorization", "Basic "+os.Getenv("PLUGIN_SONAR_TOKEN"))
+	projectRequest.Header.Add("Authorization", "Basic "+sonarToken)
 	projectResponse, err := netClient.Do(projectRequest)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"error": err,
-		}).Fatal("Failed get status")
+		}).Info("Failed to get status, retrying with encoded token...")
+
+		// Retry with the token encoded in base64
+		encodedToken := base64.StdEncoding.EncodeToString([]byte(sonarToken))
+		projectRequest.Header.Set("Authorization", "Basic "+encodedToken)
+		projectResponse, err = netClient.Do(projectRequest)
+
+		if err != nil {
+			logrus.WithFields(logrus.Fields{
+				"error": err,
+			}).Fatal("Failed to get status after retry")
+		}
 	}
 	buf, _ := ioutil.ReadAll(projectResponse.Body)
 	project := ProjectStatusResponse{}
@@ -953,7 +966,8 @@ func GetLatestTaskID(sonarHost string, projectSlug string) (string, error) {
 		return "", err
 	}
 
-	req.SetBasicAuth(os.Getenv("PLUGIN_SONAR_TOKEN"), "")
+	sonarToken := os.Getenv("PLUGIN_SONAR_TOKEN")
+	req.SetBasicAuth(sonarToken, "")
 	resp, err := netClient.Do(req)
 	if err != nil {
 		fmt.Printf("\nRequest Error in Task discovery: %s\n", err.Error())
@@ -961,10 +975,22 @@ func GetLatestTaskID(sonarHost string, projectSlug string) (string, error) {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode == http.StatusForbidden {
+		fmt.Printf("\nError in Task discovery: %s\n", "Check your token permission - probably it does not have 'Browse' permission on the project")
+		fmt.Printf("Retrying with encoded token...\n")
+
+		encodedToken := base64.StdEncoding.EncodeToString([]byte(sonarToken))
+		req.SetBasicAuth(encodedToken, "")
+		resp, err = netClient.Do(req)
+		if err != nil {
+			fmt.Printf("\nRequest Error in Task discovery after retry: %s\n", err.Error())
+			return "", err
+		}
+		defer resp.Body.Close()
+	}
+
 	if resp.StatusCode != http.StatusOK {
-		if resp.StatusCode == http.StatusForbidden {
-			fmt.Printf("\nError in Task discovery: %s\n", "Check your token permission - probably it does not have 'Browse' permission on the project")
-		} else if resp.StatusCode == http.StatusUnauthorized {
+		if resp.StatusCode == http.StatusUnauthorized {
 			fmt.Printf("\nError in Task discovery: %s\n", "Invalid Credentials - your token is not valid")
 		}
 		return "", fmt.Errorf("HTTP request error. Status code: %d", resp.StatusCode)
