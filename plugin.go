@@ -890,7 +890,7 @@ func GetProjectStatus(sonarHost string, analysisId string, projectSlug string) (
 	fmt.Printf("\n")
 	// fmt.Printf("Setting Authorization header:" + token)
 	// Retry with the token encoded in base64
-	encodedToken := base64.StdEncoding.EncodeToString([]byte(token))
+	encodedToken := base64.StdEncoding.EncodeToString([]byte(token + ":"))
 	fmt.Println(basicAuth + encodedToken)
 	projectRequest.Header.Set("Authorization", basicAuth+encodedToken)
 	fmt.Printf("\n")
