@@ -829,7 +829,7 @@ func getStatusID(taskIDOld string, sonarHost string, projectSlug string) (string
 	// 	return "", err
 	// }
 	// buf, _ := ioutil.ReadAll(projectResponse.Body)
-	buf, err := GetProjectStatus(sonarHost, reportRequest.Encode())
+	buf, err := GetProjectStatus(sonarHost, reportRequest.Encode(), projectSlug)
 
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
@@ -874,10 +874,10 @@ func getStatusID(taskIDOld string, sonarHost string, projectSlug string) (string
 	return project.ProjectStatus.Status, nil
 }
 
-func GetProjectStatus(sonarHost string, analysisId string) ([]byte, error) {
+func GetProjectStatus(sonarHost string, analysisId string, projectSlug string) ([]byte, error) {
 	token := os.Getenv("PLUGIN_SONAR_TOKEN")
 	fmt.Printf("\n")
-	fmt.Printf("Getting project status:" + analysisId)
+	fmt.Printf("Getting project status: " + projectSlug + "\n" + analysisId)
 	netClient := &http.Client{
 		Timeout: time.Second * 10, // you can adjust the timeout
 	}
@@ -891,8 +891,9 @@ func GetProjectStatus(sonarHost string, analysisId string) ([]byte, error) {
 	// fmt.Printf("Setting Authorization header:" + token)
 	// Retry with the token encoded in base64
 	encodedToken := base64.StdEncoding.EncodeToString([]byte(token))
+	fmt.Println(basicAuth + encodedToken)
 	projectRequest.Header.Set("Authorization", basicAuth+encodedToken)
-
+	fmt.Printf("\n")
 	// projectRequest.Header.Add("Authorization", basicAuth+token)
 	projectResponse, err := netClient.Do(projectRequest)
 

@@ -39,15 +39,15 @@ steps:
   #     ref:
   #       - refs/heads/main
   #       - refs/tags/**
-  - name: publish-2.0.2-java11
+  - name: publish-2.0.3-java11
     image: plugins/docker:20
     settings:
       # auto_tag: true
       # auto_tag_suffix: v2.0.2-java11
       tags:
-        - v2.0.2-java11
-        - latest-java11
-        - stable-java11
+        - v2.0.3-java11
+        # - latest-java11
+        # - stable-java11
       daemon_off: false
       dockerfile: Dockerfile
       password:
@@ -59,15 +59,15 @@ steps:
       ref:
         - refs/heads/main
         - refs/tags/**
-  - name: publish-2.0.2-java17
+  - name: publish-2.0.3-java17
     image: plugins/docker:20
     settings:
       # auto_tag: true
       # auto_tag_suffix: v2.0.2-java17
       tags:
-        - v2.0.2-java17
-        - latest-java17
-        - stable-java17
+        - v2.0.3-java17
+        # - latest-java17
+        # - stable-java17
       daemon_off: false
       dockerfile: DockerfileJava17
       password:
