@@ -16,6 +16,9 @@ steps:
       dockerfile: Dockerfile
       repo: plugins/sonarqube-scanner
       dry_run: true
+    when:
+      ref:
+        - "refs/pull/**" # Only run for pull requests
   - name: pr test java 17
     image: plugins/docker:20
     settings:
@@ -23,6 +26,9 @@ steps:
       dockerfile: DockerfileJava17
       repo: plugins/sonarqube-scanner
       dry_run: true
+    when:
+      ref:
+        - "refs/pull/**" # Only run for pull requests
   # - name: publish
   #   image: plugins/docker:18
   #   settings:
