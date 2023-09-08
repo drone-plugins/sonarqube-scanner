@@ -7,6 +7,7 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -250,7 +251,7 @@ func displaySummary(total, passed, failed int, errors int, newErrors int, projec
 	}
 
 	// Write to the .env file
-	filePath := fmt.Sprintf("%s", droneOutputPath)
+	filePath := fmt.Sprintf(droneOutputPath)
 	err := writeEnvFile(vars, filePath)
 	if err != nil {
 		fmt.Println("Error writing to .env file:", err)
@@ -1034,8 +1035,18 @@ func GetLatestTaskID(sonarHost string, projectSlug string) (string, error) {
 }
 
 func getSonarJobStatus(report *SonarReport) *TaskResponse {
+	fmt.Printf("\n")
+	fmt.Printf("==> Job Status Request:\n")
+	fmt.Printf(report.ServerURL + "/api/ce/task?id=" + report.CeTaskID)
+	fmt.Printf("\n")
+	fmt.Printf("\n")
 
 	taskRequest, err := http.NewRequest("GET", report.CeTaskURL, nil)
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"error": err,
+		}).Fatal("Failed get sonar job status")
+	}
 	taskRequest.Header.Add("Authorization", basicAuth+os.Getenv("PLUGIN_SONAR_TOKEN"))
 	taskResponse, err := netClient.Do(taskRequest)
 	if err != nil {
@@ -1043,8 +1054,18 @@ func getSonarJobStatus(report *SonarReport) *TaskResponse {
 			"error": err,
 		}).Fatal("Failed get sonar job status")
 	}
-	buf, _ := ioutil.ReadAll(taskResponse.Body)
+	buf, err := io.ReadAll(taskResponse.Body)
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"error": err,
+		}).Fatal("Failed to read sonar job status response body")
+	}
 	task := TaskResponse{}
+	fmt.Println("|----------------------------------------------------------------|")
+	fmt.Println("|  Report Result:                                                 |")
+	fmt.Println("|----------------------------------------------------------------|")
+	fmt.Print(string(buf))
+	fmt.Println("|----------------------------------------------------------------|")
 	json.Unmarshal(buf, &task)
 	return &task
 }
@@ -1052,16 +1073,21 @@ func getSonarJobStatus(report *SonarReport) *TaskResponse {
 func waitForSonarJob(report *SonarReport) (*TaskResponse, error) {
 	timeout := time.After(300 * time.Second)
 	tick := time.Tick(500 * time.Millisecond)
+	fmt.Println("Waiting for sonar job to finish...")
 	for {
 		select {
 		case <-timeout:
+			fmt.Println("Timed out waiting for sonar job to finish")
 			return nil, errors.New("timed out")
 		case <-tick:
+			fmt.Println("Checking sonar job status...")
 			job := getSonarJobStatus(report)
 			if job.Task.Status == "SUCCESS" {
+				fmt.Println("\033[32mSonar job finished successfully\033[0m")
 				return job, nil
 			}
 			if job.Task.Status == "ERROR" {
+				fmt.Println("Sonar job failed")
 				return nil, errors.New("ERROR")
 			}
 		}
