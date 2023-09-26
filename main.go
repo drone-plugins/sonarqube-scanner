@@ -9,6 +9,7 @@ import (
 )
 
 var build = "1" // build number set at compile time
+
 func main() {
 	app := cli.NewApp()
 	app.Name = "Drone-Sonar-Plugin"
@@ -249,6 +250,11 @@ func main() {
 			Usage:  "Skip the SonarQube scan",
 			EnvVar: "PLUGIN_SKIP_SCAN",
 		},
+		cli.BoolTFlag{
+			Name:   "wait_qualitygate",
+			Usage:  "Wait for the SonarQube quality gate",
+			EnvVar: "PLUGIN_WAIT_QUALITYGATE",
+		},
 	}
 	app.Run(os.Args)
 }
@@ -295,6 +301,7 @@ func run(c *cli.Context) {
 			CustomJvmParams:           c.String("custom_jvm_params"),
 			TaskId:                    c.String("taskid"),
 			SkipScan:                  c.Bool("skip_scan"),
+			WaitQualityGate:           c.Bool("wait_qualitygate"),
 		},
 		Output: Output{
 			OutputFile: c.String("output-file"),

@@ -9,7 +9,7 @@ pool:
   use: ubuntu
 
 steps:
-  - name: pr test java 11
+  - name: pr test java 17
     image: plugins/docker:20
     settings:
       daemon_off: false
@@ -19,43 +19,17 @@ steps:
     when:
       ref:
         - "refs/pull/**" # Only run for pull requests
-  - name: pr test java 17
-    image: plugins/docker:20
-    settings:
-      daemon_off: false
-      dockerfile: DockerfileJava17
-      repo: plugins/sonarqube-scanner
-      dry_run: true
-    when:
-      ref:
-        - "refs/pull/**" # Only run for pull requests
-  # - name: publish
-  #   image: plugins/docker:18
-  #   settings:
-  #     auto_tag: true
-  #     auto_tag_suffix: linux-amd64
-  #     daemon_off: false
-  #     dockerfile: Dockerfile
-  #     password:
-  #       from_secret: docker_password
-  #     repo: plugins/sonarqube-scanner
-  #     username:
-  #       from_secret: docker_username
-  #   when:
-  #     ref:
-  #       - refs/heads/main
-  #       - refs/tags/**
-  - name: publish-2.0.4-java17
+  - name: publish-2.0.5-java17
     image: plugins/docker:20
     settings:
       # auto_tag: true
       # auto_tag_suffix: v2.0.2-java17
       tags:
-        - v2.0.4-java17
-        # - latest-java17
+        - v2.0.5
+        - latest
         # - stable-java17
       daemon_off: false
-      dockerfile: DockerfileJava17
+      dockerfile: Dockerfile
       password:
         from_secret: docker_password
       repo: plugins/sonarqube-scanner

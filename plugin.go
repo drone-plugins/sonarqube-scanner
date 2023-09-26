@@ -14,6 +14,7 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"time"
 
@@ -81,6 +82,7 @@ type (
 		CustomJvmParams           string
 		TaskId                    string
 		SkipScan                  bool
+		WaitQualityGate           bool
 	}
 	Output struct {
 		OutputFile string // File where plugin output are saved
@@ -178,6 +180,8 @@ type AnalysisResponse struct {
 		Key string `json:"key"`
 	} `json:"analyses"`
 }
+
+const lineBreak = "----------------------------------------------"
 
 func init() {
 	netClient = &http.Client{
@@ -277,15 +281,15 @@ func displaySummary(total, passed, failed int, errors int, newErrors int, projec
 	fmt.Println("Successfully closed .env file")
 	fmt.Print("\n\n")
 	// Display the table
-	fmt.Println("----------------------------------------------")
+	fmt.Println(lineBreak)
 	fmt.Printf("|           STATUS           |      COUNT      |\n")
-	fmt.Println("----------------------------------------------")
+	fmt.Println(lineBreak)
 	fmt.Printf("|      (\033[32mPASSED\033[0m)              |      %d         |\n", passed)
-	fmt.Println("----------------------------------------------")
+	fmt.Println(lineBreak)
 	fmt.Printf("|      (\033[31mFAILED\033[0m)              |      %d         |\n", failed)
-	fmt.Println("----------------------------------------------")
+	fmt.Println(lineBreak)
 	fmt.Printf("|      TOTAL                 |      %d         |\n", total)
-	fmt.Println("----------------------------------------------")
+	fmt.Println(lineBreak)
 	fmt.Printf("\n\nCategorization: %s\n", category)
 }
 
@@ -402,7 +406,7 @@ func (p Plugin) Exec() error {
 		"-Dsonar.showProfiling":                     p.Config.ShowProfiling,
 		"-Dsonar.java.binaries":                     p.Config.Binaries,
 		"-Dsonar.branch.name":                       p.Config.Branch,
-		"-Dsonar.qualitygate.wait":                  p.Config.QualityEnabled,
+		"-Dsonar.qualitygate.wait":                  strconv.FormatBool(p.Config.WaitQualityGate),
 		"-Dsonar.qualitygate.timeout":               p.Config.QualityTimeout,
 		"-Dsonar.javascript.lcov.reportPaths":       p.Config.JavascitptIcovReport,
 		"-Dsonar.coverage.jacoco.xmlReportPaths":    p.Config.JacocoReportPath,
@@ -694,9 +698,9 @@ func (p Plugin) Exec() error {
 }
 
 func displayQualityGateStatus(status string, qualityEnabled bool) {
-	fmt.Println("----------------------------------------------")
+	fmt.Println(lineBreak)
 	fmt.Printf("|         QUALITY GATE STATUS REPORT           |\n")
-	fmt.Println("----------------------------------------------")
+	fmt.Println(lineBreak)
 
 	if status == "OK" {
 		fmt.Printf("|         STATUS              |      \033[32m%s\033[0m       |\n", status)
@@ -704,7 +708,7 @@ func displayQualityGateStatus(status string, qualityEnabled bool) {
 		fmt.Printf("|         STATUS              |      \033[31m%s\033[0m       |\n", status)
 	}
 
-	fmt.Println("----------------------------------------------")
+	fmt.Println(lineBreak)
 
 	if qualityEnabled {
 		fmt.Printf("|      QUALITY GATE ENABLED   |       \033[32mYES\033[0m       |\n")
@@ -713,9 +717,9 @@ func displayQualityGateStatus(status string, qualityEnabled bool) {
 	}
 
 	fmt.Printf("----------------------------------------------\n\n")
-	fmt.Println("----------------------------------------------")
+	fmt.Println(lineBreak)
 	fmt.Printf("|         Developed by: Diego Pereira          |\n")
-	fmt.Println("----------------------------------------------")
+	fmt.Println(lineBreak)
 }
 
 func staticScan(p *Plugin) (*SonarReport, error) {
@@ -778,7 +782,7 @@ func getStatus(task *TaskResponse, report *SonarReport) string {
 	// JUNUT
 	junitReport := ""
 	junitReport = string(buf) // returns a string of what was written to it
-	fmt.Println("----------------------------------------------")
+	fmt.Println(lineBreak)
 	fmt.Printf("|      SONAR SCAN + JUNIT EXPORTER PLUGIN      |\n")
 	fmt.Print("----------------------------------------------\n\n\n")
 	bytesReport := []byte(junitReport)
@@ -794,7 +798,7 @@ func getStatus(task *TaskResponse, report *SonarReport) string {
 	file, _ := xml.MarshalIndent(result, "", " ")
 	_ = ioutil.WriteFile("sonarResults.xml", file, 0644)
 
-	fmt.Println("----------------------------------------------")
+	fmt.Println(lineBreak)
 	fmt.Printf("|  Harness Drone/CIE SonarQube Plugin Results  |\n")
 	fmt.Print("----------------------------------------------\n\n\n")
 
