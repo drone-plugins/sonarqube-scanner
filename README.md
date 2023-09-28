@@ -11,12 +11,12 @@ This plugin is designed to run SonarQube scans and handle the results and conver
 
 <img src="https://github.com/drone-plugins/sonarqube-scanner/blob/main/sonar-result-v2.png" alt="Results" width="800"/>
 
-
 ### Simple Pipeline example
+
 ```yaml
 - step:
     type: Plugin
-    name: "Check Sonar "
+    name: "Check Sonar"
     identifier: run_sonar
     spec:
         connectorRef: account.DockerHubDiego
