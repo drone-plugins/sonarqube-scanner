@@ -971,50 +971,55 @@ func GetProjectStatus(sonarHost string, analysisId string, projectSlug string) (
 	return buf, nil
 }
 
+func addBearerToken(req *http.Request, token string) {
+	req.Header.Add("Authorization", "Bearer "+token)
+}
+
+func addBasicAuth(req *http.Request, token string) {
+	req.SetBasicAuth(token, "")
+}
+
 func GetLatestTaskID(sonarHost string, projectSlug string) (string, error) {
 	fmt.Printf("\nStarting Task ID Discovery\n")
 	url := fmt.Sprintf("%s/api/project_analyses/search?project=%s&ps=1", sonarHost, projectSlug)
 	fmt.Printf("URL: %s\n", url)
 
-	req, err := http.NewRequest("GET", url, nil)
+	taskRequest, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		fmt.Printf("\nError to create request in Task discovery: %s\n", err.Error())
 		return "", err
 	}
 
 	sonarToken := os.Getenv("PLUGIN_SONAR_TOKEN")
-	req.SetBasicAuth(sonarToken, "")
-	resp, err := netClient.Do(req)
+	// First, try with Bearer token
+	addBearerToken(taskRequest, sonarToken)
+	taskResponse, err := netClient.Do(taskRequest)
 	if err != nil {
-		fmt.Printf("\nRequest Error in Task discovery: %s\n", err.Error())
-		return "", err
+		logrus.WithFields(logrus.Fields{
+			"error": err,
+		}).Fatal("Failed get sonar job status")
 	}
-	defer resp.Body.Close()
 
-	if resp.StatusCode == http.StatusForbidden {
-		fmt.Printf("\nError in Task discovery: %s\n", "Check your token permission - probably it does not have 'Browse' permission on the project")
-		fmt.Printf("Retrying with encoded token...\n")
-
-		encodedToken := base64.StdEncoding.EncodeToString([]byte(sonarToken))
-		req.Header.Add("Authorization", basicAuth+encodedToken)
-		fmt.Printf("Token encoded: %s\n", encodedToken)
-		req.SetBasicAuth(encodedToken, "")
-		resp, err = netClient.Do(req)
+	// If Forbidden, try with Basic Auth
+	if taskResponse.StatusCode == http.StatusForbidden {
+		fmt.Printf("\nRetrying with Basic Auth...\n")
+		addBasicAuth(taskRequest, sonarToken)
+		taskResponse, err = netClient.Do(taskRequest)
 		if err != nil {
-			fmt.Printf("\nRequest Error in Task discovery after retry: %s\n", err.Error())
-			return "", err
+			logrus.WithFields(logrus.Fields{
+				"error": err,
+			}).Fatal("Failed get sonar job status")
 		}
-		defer resp.Body.Close()
 	}
 
-	if resp.StatusCode != http.StatusOK {
-		if resp.StatusCode == http.StatusUnauthorized {
+	if taskResponse.StatusCode != http.StatusOK {
+		if taskResponse.StatusCode == http.StatusUnauthorized {
 			fmt.Printf("\nError in Task discovery: %s\n", "Invalid Credentials - your token is not valid")
 		}
-		return "", fmt.Errorf("HTTP request error. Status code: %d", resp.StatusCode)
+		return "", fmt.Errorf("HTTP request error. Status code: %d", taskResponse.StatusCode)
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(taskResponse.Body)
 	if err != nil {
 		fmt.Printf("\nError reading response body in Task discovery: %s\n", err.Error())
 		return "", err
@@ -1052,27 +1057,43 @@ func getSonarJobStatus(report *SonarReport) *TaskResponse {
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"error": err,
-		}).Fatal("Failed get sonar job status")
+		}).Fatal("Failed to create request for Sonar job status")
 	}
-	taskRequest.Header.Add("Authorization", basicAuth+os.Getenv("PLUGIN_SONAR_TOKEN"))
+
+	sonarToken := os.Getenv("PLUGIN_SONAR_TOKEN")
+	taskRequest.Header.Add("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(sonarToken+":")))
+
 	taskResponse, err := netClient.Do(taskRequest)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"error": err,
-		}).Fatal("Failed get sonar job status")
+		}).Fatal("Failed to get Sonar job status")
 	}
-	buf, err := io.ReadAll(taskResponse.Body)
 
-	fmt.Printf("\n")
-	fmt.Printf("==> Job Status Response:\n")
-	fmt.Println(string(buf))
-	fmt.Printf("\n")
+	if taskResponse.StatusCode == http.StatusForbidden {
+		fmt.Println("Basic Auth failed. Retrying with Bearer token...")
+		taskRequest.Header.Set("Authorization", "Bearer "+sonarToken)
+		taskResponse, err = netClient.Do(taskRequest)
+		if err != nil {
+			logrus.WithFields(logrus.Fields{
+				"error": err,
+			}).Fatal("Failed to get Sonar job status with Bearer token")
+		}
+	}
+
+	buf, err := io.ReadAll(taskResponse.Body)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"error": err,
-		}).Fatal("Failed to read sonar job status response body")
+		}).Fatal("Failed to read Sonar job status response body")
 	}
+
+	fmt.Printf("\n==> Job Status Response:\n")
+	fmt.Println(string(buf))
+	fmt.Printf("\n")
+
 	task := TaskResponse{}
+
 	fmt.Println(lineBreak2)
 	fmt.Println("|  Report Result:                                                 |")
 	fmt.Println(lineBreak2)
