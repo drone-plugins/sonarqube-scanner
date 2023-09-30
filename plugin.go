@@ -40,6 +40,11 @@ var (
 	basicAuth = "Basic "
 )
 
+const (
+	lineBreak  = "----------------------------------------------"
+	lineBreak2 = "|----------------------------------------------------------------|"
+)
+
 type (
 	Config struct {
 		Key                       string
@@ -180,8 +185,6 @@ type AnalysisResponse struct {
 		Key string `json:"key"`
 	} `json:"analyses"`
 }
-
-const lineBreak = "----------------------------------------------"
 
 func init() {
 	netClient = &http.Client{
@@ -1059,17 +1062,22 @@ func getSonarJobStatus(report *SonarReport) *TaskResponse {
 		}).Fatal("Failed get sonar job status")
 	}
 	buf, err := io.ReadAll(taskResponse.Body)
+
+	fmt.Printf("\n")
+	fmt.Printf("==> Job Status Response:\n")
+	fmt.Println(string(buf))
+	fmt.Printf("\n")
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"error": err,
 		}).Fatal("Failed to read sonar job status response body")
 	}
 	task := TaskResponse{}
-	fmt.Println("|----------------------------------------------------------------|")
+	fmt.Println(lineBreak2)
 	fmt.Println("|  Report Result:                                                 |")
-	fmt.Println("|----------------------------------------------------------------|")
+	fmt.Println(lineBreak2)
 	fmt.Print(string(buf))
-	fmt.Println("|----------------------------------------------------------------|")
+	fmt.Println(lineBreak2)
 	json.Unmarshal(buf, &task)
 	return &task
 }
