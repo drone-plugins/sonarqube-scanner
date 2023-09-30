@@ -107,13 +107,22 @@ type (
 	// TaskResponse Give Compute Engine task details such as type, status, duration and associated component.
 	TaskResponse struct {
 		Task struct {
-			ID            string `json:"id"`
-			Type          string `json:"type"`
-			ComponentID   string `json:"componentId"`
-			ComponentKey  string `json:"componentKey"`
-			ComponentName string `json:"componentName"`
-			AnalysisID    string `json:"analysisId"`
-			Status        string `json:"status"`
+			ID                 string   `json:"id"`
+			Type               string   `json:"type"`
+			ComponentID        string   `json:"componentId"`
+			ComponentKey       string   `json:"componentKey"`
+			ComponentName      string   `json:"componentName"`
+			ComponentQualifier string   `json:"componentQualifier"`
+			AnalysisID         string   `json:"analysisId"`
+			Status             string   `json:"status"`
+			SubmittedAt        string   `json:"submittedAt"`
+			SubmitterLogin     string   `json:"submitterLogin"`
+			StartedAt          string   `json:"startedAt"`
+			ExecutedAt         string   `json:"executedAt"`
+			ExecutionTimeMs    int      `json:"executionTimeMs"`
+			HasScannerContext  bool     `json:"hasScannerContext"`
+			WarningCount       int      `json:"warningCount"`
+			Warnings           []string `json:"warnings"`
 		} `json:"task"`
 	}
 
@@ -753,26 +762,35 @@ func getStatus(task *TaskResponse, report *SonarReport) string {
 		"analysisId": {task.Task.AnalysisID},
 	}
 	sonarToken := os.Getenv("PLUGIN_SONAR_TOKEN")
+
+	// First try with Basic Auth
 	projectRequest, err := http.NewRequest("GET", report.ServerURL+"/api/qualitygates/project_status?"+reportRequest.Encode(), nil)
-	projectRequest.Header.Add("Authorization", basicAuth+sonarToken)
-	projectResponse, err := netClient.Do(projectRequest)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"error": err,
-		}).Info("Failed to get status, retrying with encoded token...")
+		}).Fatal("Failed get status")
+	}
 
-		// Retry with the token encoded in base64
-		encodedToken := base64.StdEncoding.EncodeToString([]byte(sonarToken))
-		projectRequest.Header.Set("Authorization", "Basic "+encodedToken)
+	projectRequest.Header.Add("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(sonarToken+":")))
+	projectResponse, err := netClient.Do(projectRequest)
+
+	if err != nil || projectResponse.StatusCode != http.StatusOK {
+		logrus.WithFields(logrus.Fields{
+			"error": err,
+		}).Info("Failed to get status with Basic Auth, retrying with Bearer token...")
+
+		// Retry with Bearer token
+		projectRequest.Header.Set("Authorization", "Bearer "+sonarToken)
 		projectResponse, err = netClient.Do(projectRequest)
 
-		if err != nil {
+		if err != nil || projectResponse.StatusCode != http.StatusOK {
 			logrus.WithFields(logrus.Fields{
 				"error": err,
-			}).Fatal("Failed to get status after retry")
+			}).Fatal("Failed to get status after retry with Bearer token")
 		}
 	}
-	buf, _ := ioutil.ReadAll(projectResponse.Body)
+
+	buf, _ := io.ReadAll(projectResponse.Body)
 	project := ProjectStatusResponse{}
 	if err := json.Unmarshal(buf, &project); err != nil {
 		logrus.WithFields(logrus.Fields{
@@ -780,7 +798,7 @@ func getStatus(task *TaskResponse, report *SonarReport) string {
 		}).Fatal("Failed")
 	}
 	fmt.Printf("==> Report Result:\n")
-	fmt.Printf(string(buf))
+	fmt.Println(string(buf))
 
 	// JUNUT
 	junitReport := ""
