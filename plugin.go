@@ -770,7 +770,10 @@ func getStatus(task *TaskResponse, report *SonarReport) string {
 			"error": err,
 		}).Fatal("Failed get status")
 	}
-
+	fmt.Printf("==> Job Quality Gate Request:\n")
+	fmt.Printf(report.ServerURL + "/api/qualitygates/project_status?" + reportRequest.Encode())
+	fmt.Printf("\n")
+	fmt.Printf("\n")
 	projectRequest.Header.Add("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(sonarToken+":")))
 	projectResponse, err := netClient.Do(projectRequest)
 
@@ -791,6 +794,9 @@ func getStatus(task *TaskResponse, report *SonarReport) string {
 	}
 
 	buf, _ := io.ReadAll(projectResponse.Body)
+	fmt.Printf("==> Report Result:\n")
+	fmt.Println(string(buf))
+	fmt.Printf("\n")
 	project := ProjectStatusResponse{}
 	if err := json.Unmarshal(buf, &project); err != nil {
 		logrus.WithFields(logrus.Fields{
