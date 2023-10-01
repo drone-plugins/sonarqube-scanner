@@ -9,7 +9,7 @@ pool:
   use: ubuntu
 
 steps:
-  - name: pr test java 17
+  - name: pr test java
     image: plugins/docker:20
     settings:
       daemon_off: false
@@ -19,13 +19,13 @@ steps:
     when:
       ref:
         - "refs/pull/**" # Only run for pull requests
-  - name: publish-2.0.5-java17
+  - name: publish-2.1.0
     image: plugins/docker:20
     settings:
       # auto_tag: true
       # auto_tag_suffix: v2.0.2-java17
       tags:
-        - v2.0.5
+        - v2.1.0
         - latest
         # - stable-java17
       daemon_off: false
