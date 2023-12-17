@@ -398,6 +398,31 @@ func GetProjectKey(key string) string {
 	return projectKey
 }
 
+func PreFlightGetLatestTaskID(config Config) (string, error) {
+	// token := os.Getenv("PLUGIN_SONAR_TOKEN")
+
+	var statusID string
+	var err error
+	if config.PRKey != "" {
+		fmt.Printf("==> PR Key: " + config.PRKey + "\n")
+		statusID, err = getStatusV2("pr", config.PRKey, config.Host, config.Key)
+	} else if config.Branch != "" {
+		fmt.Printf("==> Branch: " + config.Branch + "\n")
+		statusID, err = getStatusV2("branch", config.Branch, config.Host, config.Key)
+	} else {
+		fmt.Printf("==> Project Key: " + config.Key + "\n")
+		statusID, err = getStatusID(config.TaskId, config.Host, config.Key)
+	}
+
+	if err != nil {
+		fmt.Printf("\n\n==> Error getting the latest scanID\n\n")
+		fmt.Printf("Error: %s", err.Error())
+		return "", err
+	}
+
+	return statusID, nil
+}
+
 func (p Plugin) Exec() error {
 	// Initial values
 	args := []string{
@@ -601,25 +626,31 @@ func (p Plugin) Exec() error {
 		fmt.Printf("#######################################\n")
 
 		// statusID, err := getStatusID(p.Config.TaskId, p.Config.Host, p.Config.Key)
-		var statusID string
-		var err error
-		if p.Config.PRKey != "" {
-			fmt.Printf("==> PR Key: " + p.Config.PRKey + "\n")
-			statusID, err = getStatusV2("pr", p.Config.PRKey, p.Config.Host, p.Config.Key)
-		} else if p.Config.Branch != "" {
-			fmt.Printf("==> Branch: " + p.Config.Branch + "\n")
-			statusID, err = getStatusV2("branch", p.Config.Branch, p.Config.Host, p.Config.Key)
-		} else {
-			fmt.Printf("==> Project Key: " + p.Config.Key + "\n")
-			statusID, err = getStatusID(p.Config.TaskId, p.Config.Host, p.Config.Key)
-		}
+		// var statusID string
+		// var err error
+		// if p.Config.PRKey != "" {
+		// 	fmt.Printf("==> PR Key: " + p.Config.PRKey + "\n")
+		// 	statusID, err = getStatusV2("pr", p.Config.PRKey, p.Config.Host, p.Config.Key)
+		// } else if p.Config.Branch != "" {
+		// 	fmt.Printf("==> Branch: " + p.Config.Branch + "\n")
+		// 	statusID, err = getStatusV2("branch", p.Config.Branch, p.Config.Host, p.Config.Key)
+		// } else {
+		// 	fmt.Printf("==> Project Key: " + p.Config.Key + "\n")
+		// 	statusID, err = getStatusID(p.Config.TaskId, p.Config.Host, p.Config.Key)
+		// }
 
+		// if err != nil {
+		// 	fmt.Printf("\n\n==> Error getting the latest scanID\n\n")
+		// 	fmt.Printf("Error: %s", err.Error())
+		// 	return err
+		// }
+		var err error
+		status, err = PreFlightGetLatestTaskID(p.Config)
 		if err != nil {
 			fmt.Printf("\n\n==> Error getting the latest scanID\n\n")
 			fmt.Printf("Error: %s", err.Error())
 			return err
 		}
-		status = statusID
 	} else {
 		fmt.Printf("Starting Analisys")
 		fmt.Printf("\n")
