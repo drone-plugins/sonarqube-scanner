@@ -599,7 +599,21 @@ func (p Plugin) Exec() error {
 		fmt.Printf("#######################################\n")
 		fmt.Printf("Waiting for quality gate validation...\n")
 		fmt.Printf("#######################################\n")
-		statusID, err := getStatusID(p.Config.TaskId, p.Config.Host, p.Config.Key)
+
+		// statusID, err := getStatusID(p.Config.TaskId, p.Config.Host, p.Config.Key)
+		var statusID string
+		var err error
+		if p.Config.PRKey != "" {
+			fmt.Printf("==> PR Key: " + p.Config.PRKey + "\n")
+			statusID, err = getStatusV2("pr", p.Config.PRKey, p.Config.Host, p.Config.Key)
+		} else if p.Config.Branch != "" {
+			fmt.Printf("==> Branch: " + p.Config.Branch + "\n")
+			statusID, err = getStatusV2("branch", p.Config.Branch, p.Config.Host, p.Config.Key)
+		} else {
+			fmt.Printf("==> Project Key: " + p.Config.Key + "\n")
+			statusID, err = getStatusID(p.Config.TaskId, p.Config.Host, p.Config.Key)
+		}
+
 		if err != nil {
 			fmt.Printf("\n\n==> Error getting the latest scanID\n\n")
 			fmt.Printf("Error: %s", err.Error())
@@ -834,6 +848,7 @@ func getStatus(task *TaskResponse, report *SonarReport) string {
 
 func getStatusID(taskIDOld string, sonarHost string, projectSlug string) (string, error) {
 	// token := os.Getenv("PLUGIN_SONAR_TOKEN")
+
 	taskID, err := GetLatestTaskID(sonarHost, projectSlug)
 	if err != nil {
 		fmt.Println("Failed to get the latest task ID:", err)
@@ -849,6 +864,90 @@ func getStatusID(taskIDOld string, sonarHost string, projectSlug string) (string
 	fmt.Printf("\n")
 	fmt.Printf("\n")
 	fmt.Printf("analysisId:" + taskID)
+	fmt.Printf("\n")
+
+	// projectRequest, err := http.NewRequest("GET", sonarHost+"/api/qualitygates/project_status?"+reportRequest.Encode(), nil)
+	// projectRequest.Header.Add("Authorization", basicAuth+token)
+	// projectResponse, err := netClient.Do(projectRequest)
+	// if err != nil {
+	// 	logrus.WithFields(logrus.Fields{
+	// 		"error": err,
+	// 	}).Fatal("Failed get status")
+	// 	return "", err
+	// }
+	// buf, _ := ioutil.ReadAll(projectResponse.Body)
+	buf, err := GetProjectStatus(sonarHost, reportRequest.Encode(), projectSlug)
+
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"error": err,
+		}).Error("Failed to get project status")
+	}
+
+	project := ProjectStatusResponse{}
+	if err := json.Unmarshal(buf, &project); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"error": err,
+		}).Fatal("Failed")
+		return "", nil
+	}
+
+	fmt.Printf("==> Report Result:\n")
+	fmt.Printf(string(buf))
+
+	// JUNUT
+	junitReport := ""
+	junitReport = string(buf) // returns a string of what was written to it
+	fmt.Printf("\n---------------------> JUNIT Exporter <---------------------\n")
+	bytesReport := []byte(junitReport)
+	var projectReport Project
+	err = json.Unmarshal(bytesReport, &projectReport)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("%+v", projectReport)
+	fmt.Printf("\n")
+	result := ParseJunit(projectReport, "BankingApp")
+	file, _ := xml.MarshalIndent(result, "", " ")
+	_ = ioutil.WriteFile("sonarResults.xml", file, 0644)
+
+	fmt.Printf("\n")
+	fmt.Printf("\n======> JUNIT Exporter <======\n")
+
+	//JUNIT
+	fmt.Printf("\n======> Harness Drone/CIE SonarQube Plugin <======\n\n====> Results:")
+
+	return project.ProjectStatus.Status, nil
+}
+
+func getStatusV2(scanType string, scanValue string, sonarHost string, projectSlug string) (string, error) {
+	// token := os.Getenv("PLUGIN_SONAR_TOKEN")
+
+	fmt.Println("Searchng last analysis")
+
+	var reportRequest url.Values
+
+	if scanType == "branch" {
+		fmt.Println("Searchng last analysis by branch")
+		reportRequest = url.Values{
+			"branch":     {scanValue},
+			"projectKey": {projectSlug},
+		}
+	} else {
+		fmt.Println("Searchng last analysis by pull request")
+		reportRequest = url.Values{
+			"pullRequest": {scanValue},
+			"projectKey":  {projectSlug},
+		}
+	}
+
+	fmt.Printf("==> Job Status Request:\n")
+	fmt.Printf(sonarHost + "/api/qualitygates/project_status?" + reportRequest.Encode())
+	fmt.Printf("\n")
+	fmt.Printf("\n")
+	fmt.Printf("scanType:" + scanType)
+	fmt.Printf("scanValue:" + scanValue)
 	fmt.Printf("\n")
 
 	// projectRequest, err := http.NewRequest("GET", sonarHost+"/api/qualitygates/project_status?"+reportRequest.Encode(), nil)
