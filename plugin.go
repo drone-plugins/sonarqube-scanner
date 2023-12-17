@@ -154,13 +154,6 @@ type (
 		ActualValue    string `json:"actualValue"`
 	}
 
-	// type Period struct {
-	//     Index     int    `json:"index"`
-	//     Mode      string `json:"mode"`
-	//     Date      string `json:"date"`
-	//     Parameter string `json:"parameter,omitempty"` // this might not always be present
-	// }
-
 	Testsuites struct {
 		XMLName   xml.Name    `xml:"testsuites"`
 		Text      string      `xml:",chardata"`
@@ -273,20 +266,6 @@ func displaySummary(total, passed, failed int, errors int, newErrors int, projec
 		fmt.Println("Error writing to .env file:", err)
 		// return
 	}
-	// file, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	// if err != nil {
-	// 	fmt.Println("Error opening/creating .env file:", err)
-	// 	// return
-	// }
-
-	// for key, value := range vars {
-	// 	fmt.Println("Writing to .env file:", key, value)
-	// 	_, err = file.WriteString(fmt.Sprintf("%s=%s\n", key, value))
-	// 	if err != nil {
-	// 		fmt.Println("Error writing to .env file:", err)
-	// 		// return
-	// 	}
-	// }
 
 	fmt.Println("Successfully wrote to .env file")
 	// defer file.Close()
@@ -398,6 +377,34 @@ func GetProjectKey(key string) string {
 	return projectKey
 }
 
+func logConfigInfo(configType, configValue string) {
+	fmt.Printf("==> %s: %s\n", configType, configValue)
+}
+
+func PreFlightGetLatestTaskID(config Config) (string, error) {
+	var statusID string
+	var err error
+
+	if config.PRKey != "" {
+		logConfigInfo("PR Key", config.PRKey)
+		statusID, err = getStatusV2("pr", config.PRKey, config.Host, config.Key)
+	} else if config.Branch != "" {
+		logConfigInfo("Branch", config.Branch)
+		statusID, err = getStatusV2("branch", config.Branch, config.Host, config.Key)
+	} else {
+		logConfigInfo("Project Key", config.Key)
+		statusID, err = getStatusID(config.TaskId, config.Host, config.Key)
+	}
+
+	if err != nil {
+		fmt.Printf("\n\n==> Error getting the latest scanID\n\n")
+		fmt.Printf("Error: %s", err.Error())
+		return "", err
+	}
+
+	return statusID, nil
+}
+
 func (p Plugin) Exec() error {
 	// Initial values
 	args := []string{
@@ -471,113 +478,6 @@ func (p Plugin) Exec() error {
 		fmt.Printf("\n\n==> Sonar Java Plugin Jacoco Path configured!\n\n")
 	}
 
-	// args := []string{
-	// 	"-Dsonar.host.url=" + p.Config.Host,
-	// 	"-Dsonar.login=" + p.Config.Token,
-	// }
-	// projectFinalKey := p.Config.Key
-
-	// if len(p.Config.Verbose) >= 1 {
-	// 	args = append(args, "-X")
-	// }
-
-	// if !p.Config.UsingProperties {
-	// 	argsParameter := []string{
-	// 		"-Dsonar.projectKey=" + projectFinalKey,
-	// 		"-Dsonar.projectName=" + p.Config.Name,
-	// 		"-Dsonar.projectVersion=" + p.Config.Version,
-	// 		"-Dsonar.sources=" + p.Config.Sources,
-	// 		"-Dsonar.ws.timeout=" + p.Config.Timeout,
-	// 		"-Dsonar.inclusions=" + p.Config.Inclusions,
-	// 		"-Dsonar.exclusions=" + p.Config.Exclusions,
-	// 		"-Dsonar.log.level=" + p.Config.Level,
-	// 		"-Dsonar.showProfiling=" + p.Config.ShowProfiling,
-	// 		"-Dsonar.scm.provider=git",
-	// 		"-Dsonar.java.binaries=" + p.Config.Binaries,
-	// 	}
-	// 	args = append(args, argsParameter...)
-	// }
-	// if p.Config.BranchAnalysis {
-	// 	args = append(args, "-Dsonar.branch.name="+p.Config.Branch)
-	// }
-	// if p.Config.QualityEnabled == "true" {
-	// 	args = append(args, "-Dsonar.qualitygate.wait="+p.Config.QualityEnabled)
-	// 	args = append(args, "-Dsonar.qualitygate.timeout="+p.Config.QualityTimeout)
-	// }
-	// if len(p.Config.JavascitptIcovReport) >= 1 {
-	// 	args = append(args, "-Dsonar.javascript.lcov.reportPaths="+p.Config.JavascitptIcovReport)
-	// }
-	// if len(p.Config.JacocoReportPath) >= 1 {
-	// 	args = append(args, "-Dsonar.coverage.jacoco.xmlReportPaths="+p.Config.JacocoReportPath)
-	// 	fmt.Printf("\n\n==> Sonar Java Plugin Jacoco configured!\n\n")
-	// 	fmt.Printf("\n\n==> -Dsonar.coverage.jacoco.xmlReportPaths=" + p.Config.JacocoReportPath + "\n\n")
-	// }
-	// if len(p.Config.JavaCoveragePlugin) >= 1 {
-	// 	args = append(args, "-Dsonar.java.coveragePlugin="+p.Config.JavaCoveragePlugin)
-	// 	fmt.Printf("\n\n==> Sonar Java Plugin Jacoco Path configured!\n\n")
-	// }
-	// if len(p.Config.JunitReportPaths) >= 1 {
-	// 	args = append(args, "-Dsonar.junit.reportPaths="+p.Config.JunitReportPaths)
-	// }
-	// if len(p.Config.SourceEncoding) >= 1 {
-	// 	args = append(args, "-Dsonar.sourceEncoding="+p.Config.SourceEncoding)
-	// }
-	// if len(p.Config.SonarTests) >= 1 {
-	// 	args = append(args, "-Dsonar.tests="+p.Config.SonarTests)
-	// }
-	// if len(p.Config.JavaTest) >= 1 {
-	// 	args = append(args, "-Dsonar.java.test.binaries="+p.Config.JavaTest)
-	// }
-	// if len(p.Config.CoverageExclusion) >= 1 {
-	// 	args = append(args, "-Dsonar.coverage.exclusions="+p.Config.CoverageExclusion)
-	// }
-	// if len(p.Config.JavaSource) >= 1 {
-	// 	args = append(args, "-Dsonar.java.source="+p.Config.JavaSource)
-	// }
-	// if len(p.Config.JavaLibraries) >= 1 {
-	// 	args = append(args, "-Dsonar.java.libraries="+p.Config.JavaLibraries)
-	// }
-	// if len(p.Config.SurefireReportsPath) >= 1 {
-	// 	args = append(args, "-Dsonar.surefire.reportsPath="+p.Config.SurefireReportsPath)
-	// }
-	// if len(p.Config.TypescriptLcovReportPaths) >= 1 {
-	// 	args = append(args, "-Dsonar.sonar.typescript.lcov.reportPaths="+p.Config.TypescriptLcovReportPaths)
-	// }
-	// if len(p.Config.Verbose) >= 1 {
-	// 	args = append(args, "-Dsonar.verbose="+p.Config.Verbose)
-	// }
-
-	// if len(p.Config.CustomJvmParams) >= 1 {
-
-	// 	params := strings.Split(p.Config.CustomJvmParams, ",")
-
-	// 	for _, param := range params {
-	// 		//fmt.Println(i, param)
-	// 		args = append(args, param)
-	// 	}
-
-	// }
-
-	// if len(p.Config.PRKey) >= 1 {
-	// 	args = append(args, "-Dsonar.pullrequest.key="+p.Config.PRKey)
-	// }
-
-	// if len(p.Config.PRBranch) >= 1 {
-	// 	args = append(args, "-Dsonar.pullrequest.branch="+p.Config.PRBranch)
-	// }
-
-	// if len(p.Config.PRBase) >= 1 {
-	// 	args = append(args, "-Dsonar.pullrequest.base="+p.Config.PRBase)
-	// }
-
-	// if len(p.Config.SSLKeyStorePassword) >= 1 {
-	// 	args = append(args, "-Djavax.net.ssl.trustStorePassword="+p.Config.SSLKeyStorePassword)
-	// }
-
-	// if len(p.Config.CacertsLocation) >= 1 {
-	// 	args = append(args, "-Djavax.net.ssl.trustStore="+p.Config.CacertsLocation)
-	// }
-
 	os.Setenv("SONAR_USER_HOME", ".sonar")
 
 	fmt.Printf("\n\n")
@@ -599,13 +499,13 @@ func (p Plugin) Exec() error {
 		fmt.Printf("#######################################\n")
 		fmt.Printf("Waiting for quality gate validation...\n")
 		fmt.Printf("#######################################\n")
-		statusID, err := getStatusID(p.Config.TaskId, p.Config.Host, p.Config.Key)
+		var err error
+		status, err = PreFlightGetLatestTaskID(p.Config)
 		if err != nil {
 			fmt.Printf("\n\n==> Error getting the latest scanID\n\n")
-			fmt.Printf("Error: %s", err.Error())
+			logConfigInfo("Error", err.Error())
 			return err
 		}
-		status = statusID
 	} else {
 		fmt.Printf("Starting Analisys")
 		fmt.Printf("\n")
@@ -615,7 +515,7 @@ func (p Plugin) Exec() error {
 		err := cmd.Run()
 		if err != nil {
 			fmt.Printf("\n\n==> Error in Analysis\n\n")
-			fmt.Printf("Error: %s", err.Error())
+			logConfigInfo("Error", err.Error())
 			//return err
 		}
 		fmt.Printf("\n==> Sonar Analysis Finished!\n\n")
@@ -834,6 +734,7 @@ func getStatus(task *TaskResponse, report *SonarReport) string {
 
 func getStatusID(taskIDOld string, sonarHost string, projectSlug string) (string, error) {
 	// token := os.Getenv("PLUGIN_SONAR_TOKEN")
+
 	taskID, err := GetLatestTaskID(sonarHost, projectSlug)
 	if err != nil {
 		fmt.Println("Failed to get the latest task ID:", err)
@@ -851,16 +752,80 @@ func getStatusID(taskIDOld string, sonarHost string, projectSlug string) (string
 	fmt.Printf("analysisId:" + taskID)
 	fmt.Printf("\n")
 
-	// projectRequest, err := http.NewRequest("GET", sonarHost+"/api/qualitygates/project_status?"+reportRequest.Encode(), nil)
-	// projectRequest.Header.Add("Authorization", basicAuth+token)
-	// projectResponse, err := netClient.Do(projectRequest)
-	// if err != nil {
-	// 	logrus.WithFields(logrus.Fields{
-	// 		"error": err,
-	// 	}).Fatal("Failed get status")
-	// 	return "", err
-	// }
-	// buf, _ := ioutil.ReadAll(projectResponse.Body)
+	buf, err := GetProjectStatus(sonarHost, reportRequest.Encode(), projectSlug)
+
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"error": err,
+		}).Error("Failed to get project status")
+	}
+
+	project := ProjectStatusResponse{}
+	if err := json.Unmarshal(buf, &project); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"error": err,
+		}).Fatal("Failed")
+		return "", nil
+	}
+
+	fmt.Printf("==> Report Result:\n")
+	fmt.Printf(string(buf))
+
+	// JUNUT
+	junitReport := ""
+	junitReport = string(buf) // returns a string of what was written to it
+	fmt.Printf("\n---------------------> JUNIT Exporter <---------------------\n")
+	bytesReport := []byte(junitReport)
+	var projectReport Project
+	err = json.Unmarshal(bytesReport, &projectReport)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("%+v", projectReport)
+	fmt.Printf("\n")
+	result := ParseJunit(projectReport, "BankingApp")
+	file, _ := xml.MarshalIndent(result, "", " ")
+	_ = ioutil.WriteFile("sonarResults.xml", file, 0644)
+
+	fmt.Printf("\n")
+	fmt.Printf("\n======> JUNIT Exporter <======\n")
+
+	//JUNIT
+	fmt.Printf("\n======> Harness Drone/CIE SonarQube Plugin <======\n\n====> Results:")
+
+	return project.ProjectStatus.Status, nil
+}
+
+func getStatusV2(scanType string, scanValue string, sonarHost string, projectSlug string) (string, error) {
+	// token := os.Getenv("PLUGIN_SONAR_TOKEN")
+
+	fmt.Println("Searchng last analysis")
+
+	var reportRequest url.Values
+
+	if scanType == "branch" {
+		fmt.Println("Searchng last analysis by branch")
+		reportRequest = url.Values{
+			"branch":     {scanValue},
+			"projectKey": {projectSlug},
+		}
+	} else {
+		fmt.Println("Searchng last analysis by pull request")
+		reportRequest = url.Values{
+			"pullRequest": {scanValue},
+			"projectKey":  {projectSlug},
+		}
+	}
+
+	fmt.Printf("==> Job Status Request:\n")
+	fmt.Printf(sonarHost + "/api/qualitygates/project_status?" + reportRequest.Encode())
+	fmt.Printf("\n")
+	fmt.Printf("\n")
+	fmt.Printf("scanType:" + scanType)
+	fmt.Printf("scanValue:" + scanValue)
+	fmt.Printf("\n")
+
 	buf, err := GetProjectStatus(sonarHost, reportRequest.Encode(), projectSlug)
 
 	if err != nil {

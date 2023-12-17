@@ -9,6 +9,8 @@ This plugin is designed to run SonarQube scans and handle the results and conver
 - Quality Gate status reporting + Metrics
 - Skip Scan and only check for quality Gate Status of a specific analysisId or last analysis
 
+Obs: USe branch and pr_key params for accuracy results matches when skiping the scan
+
 <img src="https://github.com/drone-plugins/sonarqube-scanner/blob/main/sonar-result-v2.png" alt="Results" width="800"/>
 
 ### Simple Pipeline example
@@ -109,7 +111,7 @@ spec:
   - Example: `"token": "your-sonarqube-token"`
 - `ver`: The version of the project.
   - Example: `"ver": "1.0.0"`
-- `branch`: The branch of the project.
+- `branch`: The branch of the project. This parameter is used to specify the branch of your codebase that the results should be matched with. If you're working on multiple branches, it's important to specify the correct branch to ensure that you're looking at the correct set of results.
   - Example: `"branch": "master"`
 - `timeout`: The timeout for the Sonar scanner.
   - Example: `"timeout": "300"`
@@ -157,8 +159,8 @@ spec:
   - Example: `"tests": "/path/to/tests"`
 - `java_test`: Java Test.
   - Example: `"java_test": "/path/to/java/test"`
-- `pr_key`: PR Key.
-  - Example: `"pr_key": "your-pr-key"`
+- `pr_key`: Pull Request Key.
+  - Example: `"pr_key": "123"`
 - `pr_branch`: PR Branch.
   - Example: `"pr_branch": "your-pr-branch"`
 - `pr_base`: PR Base.
