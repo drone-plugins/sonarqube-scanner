@@ -658,9 +658,36 @@ func staticScan(p *Plugin) (*SonarReport, error) {
 }
 
 func getStatus(task *TaskResponse, report *SonarReport) string {
-	reportRequest := url.Values{
-		"analysisId": {task.Task.AnalysisID},
+
+	qg_type := os.Getenv("PLUGIN_QG_TYPE")
+
+	var reportRequest url.Values
+
+	if qg_type == "branch" {
+		qg_branch := os.Getenv("PLUGIN_BRANCH")
+		reportRequest = url.Values{
+			"branch": {qg_branch},
+		}
+	} else if qg_type == "pullRequest" {
+		qg_pr := os.Getenv("PLUGIN_PR_KEY")
+		reportRequest = url.Values{
+			"pullRequest": {qg_pr},
+		}
+
+	} else if qg_type == "projectKey" {
+		qg_projectKey := os.Getenv("PLUGIN_SONAR_KEY")
+		reportRequest = url.Values{
+			"projectKey": {qg_projectKey},
+		}
+	} else {
+		reportRequest = url.Values{
+			"analysisId": {task.Task.AnalysisID},
+		}
 	}
+
+	// reportRequest := url.Values{
+	// 	"analysisId": {task.Task.AnalysisID},
+	// }
 	sonarToken := os.Getenv("PLUGIN_SONAR_TOKEN")
 
 	// First try with Basic Auth
