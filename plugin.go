@@ -660,22 +660,24 @@ func staticScan(p *Plugin) (*SonarReport, error) {
 func getStatus(task *TaskResponse, report *SonarReport) string {
 
 	qg_type := os.Getenv("PLUGIN_QG_TYPE")
+	qg_projectKey := os.Getenv("PLUGIN_SONAR_KEY")
 
 	var reportRequest url.Values
 
 	if qg_type == "branch" {
 		qg_branch := os.Getenv("PLUGIN_BRANCH")
 		reportRequest = url.Values{
-			"branch": {qg_branch},
+			"branch":     {qg_branch},
+			"projectKey": {qg_projectKey},
 		}
 	} else if qg_type == "pullRequest" {
 		qg_pr := os.Getenv("PLUGIN_PR_KEY")
 		reportRequest = url.Values{
 			"pullRequest": {qg_pr},
+			"projectKey":  {qg_projectKey},
 		}
 
 	} else if qg_type == "projectKey" {
-		qg_projectKey := os.Getenv("PLUGIN_SONAR_KEY")
 		reportRequest = url.Values{
 			"projectKey": {qg_projectKey},
 		}
