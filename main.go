@@ -109,6 +109,12 @@ func main() {
 			EnvVar: "PLUGIN_SONAR_QUALITY_ENABLED",
 		},
 		cli.StringFlag{
+			Name:   "quality_gate_type",
+			Usage:  "if this setting is not set the default is analysisID, if you want to use other QG checks then choose: branch, pullRequest or projectKey",
+			Value:  "analysisID",
+			EnvVar: "PLUGIN_QG_TYPE",
+		},
+		cli.StringFlag{
 			Name:   "qualitygate_timeout",
 			Usage:  "number in seconds for timeout",
 			Value:  "300",
