@@ -1,3 +1,5 @@
+[![Quality Gate Status](https://sonar.harness-demo.site/api/project_badges/measure?project=sonarqube-scanner&metric=alert_status&token=sqb_44744288d1f30ee517e04dbf69e29f836cc8f45b)](https://sonar.harness-demo.site/dashboard?id=sonarqube-scanner)
+
 # Harness Drone/CIE SonarQube Plugin with Quality Gate
 
 This plugin is designed to run SonarQube scans and handle the results and convert it to JUnit Format. It's written in Go and check the report results for status OK.

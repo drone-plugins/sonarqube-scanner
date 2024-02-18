@@ -750,7 +750,7 @@ func getStatus(task *TaskResponse, report *SonarReport) string {
 
 	fmt.Printf("%+v", projectReport)
 	fmt.Printf("\n")
-	result := ParseJunit(projectReport, "BankingApp")
+	result := ParseJunit(projectReport, qg_projectKey)
 	file, _ := xml.MarshalIndent(result, "", " ")
 	_ = ioutil.WriteFile("sonarResults.xml", file, 0644)
 
@@ -810,12 +810,13 @@ func getStatusID(taskIDOld string, sonarHost string, projectSlug string) (string
 	if err != nil {
 		panic(err)
 	}
+	qg_projectKey := os.Getenv("PLUGIN_SONAR_KEY")
 
 	fmt.Printf("%+v", projectReport)
 	fmt.Printf("\n")
-	result := ParseJunit(projectReport, "BankingApp")
+	result := ParseJunit(projectReport, qg_projectKey)
 	file, _ := xml.MarshalIndent(result, "", " ")
-	_ = ioutil.WriteFile("sonarResults.xml", file, 0644)
+	_ = os.WriteFile("sonarResults.xml", file, 0644)
 
 	fmt.Printf("\n")
 	fmt.Printf("\n======> JUNIT Exporter <======\n")
@@ -884,12 +885,13 @@ func getStatusV2(scanType string, scanValue string, sonarHost string, projectSlu
 	if err != nil {
 		panic(err)
 	}
+	qg_projectKey := os.Getenv("PLUGIN_SONAR_KEY")
 
 	fmt.Printf("%+v", projectReport)
 	fmt.Printf("\n")
-	result := ParseJunit(projectReport, "BankingApp")
+	result := ParseJunit(projectReport, qg_projectKey)
 	file, _ := xml.MarshalIndent(result, "", " ")
-	_ = ioutil.WriteFile("sonarResults.xml", file, 0644)
+	_ = os.WriteFile("sonarResults.xml", file, 0644)
 
 	fmt.Printf("\n")
 	fmt.Printf("\n======> JUNIT Exporter <======\n")
