@@ -1,4 +1,3 @@
-[![Quality Gate Status](https://sonar.harness-demo.site/api/project_badges/measure?project=sonarqube-scanner&metric=alert_status&token=sqb_44744288d1f30ee517e04dbf69e29f836cc8f45b)](https://sonar.harness-demo.site/dashboard?id=sonarqube-scanner)
 
 # Harness Drone/CIE SonarQube Plugin with Quality Gate
 
