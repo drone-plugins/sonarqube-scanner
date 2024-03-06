@@ -579,7 +579,7 @@ func (p Plugin) Exec() error {
 	fmt.Printf("==> SONAR PROJECT DASHBOARD <==\n")
 	fmt.Printf(p.Config.Host)
 	fmt.Printf(sonarDashStatic)
-	fmt.Printf(p.Config.Name)
+	fmt.Printf(p.Config.Key)
 	fmt.Printf("\n==> Harness CIE SonarQube Plugin with Quality Gateway <==\n\n")
 	// "Docker", p.Config.ArtifactFile, (p.Config.Host + sonarDashStatic + p.Config.Name), "Sonar", "Harness Sonar Plugin", []string{"Diego", "latest"})
 
