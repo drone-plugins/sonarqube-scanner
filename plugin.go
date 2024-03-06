@@ -345,7 +345,7 @@ func ParseJunit(projectArray Project, projectName string) Testsuites {
 	os.Setenv("SONAR_RESULT_NEW_ERRORS", fmt.Sprintf("%d", newErrors))  // Set the number of new errors as an environment variable
 	os.Setenv("SONAR_RESULT_OVERALL_ERRORS", fmt.Sprintf("%d", errors)) // Set the number of errors as an environment variable
 
-	dashboardLink := os.Getenv("PLUGIN_SONAR_HOST") + sonarDashStatic + os.Getenv("PLUGIN_SONAR_NAME")
+	dashboardLink := os.Getenv("PLUGIN_SONAR_HOST") + sonarDashStatic + os.Getenv("PLUGIN_SONAR_KEY")
 	SonarJunitReport := &Testsuites{
 		TestSuite: []Testsuite{
 			Testsuite{
@@ -414,37 +414,37 @@ func (p Plugin) Exec() error {
 
 	// Map of potential configurations
 	configurations := map[string]string{
-		"-Dsonar.projectKey":                        p.Config.Key,
-		"-Dsonar.projectName":                       p.Config.Name,
-		"-Dsonar.projectVersion":                    p.Config.Version,
-		"-Dsonar.sources":                           p.Config.Sources,
-		"-Dsonar.ws.timeout":                        p.Config.Timeout,
-		"-Dsonar.inclusions":                        p.Config.Inclusions,
-		"-Dsonar.exclusions":                        p.Config.Exclusions,
-		"-Dsonar.log.level":                         p.Config.Level,
-		"-Dsonar.showProfiling":                     p.Config.ShowProfiling,
-		"-Dsonar.java.binaries":                     p.Config.Binaries,
-		"-Dsonar.branch.name":                       p.Config.Branch,
-		"-Dsonar.qualitygate.wait":                  strconv.FormatBool(p.Config.WaitQualityGate),
-		"-Dsonar.qualitygate.timeout":               p.Config.QualityTimeout,
-		"-Dsonar.javascript.lcov.reportPaths":       p.Config.JavascitptIcovReport,
-		"-Dsonar.coverage.jacoco.xmlReportPaths":    p.Config.JacocoReportPath,
-		"-Dsonar.java.coveragePlugin":               p.Config.JavaCoveragePlugin,
-		"-Dsonar.junit.reportPaths":                 p.Config.JunitReportPaths,
-		"-Dsonar.sourceEncoding":                    p.Config.SourceEncoding,
-		"-Dsonar.tests":                             p.Config.SonarTests,
-		"-Dsonar.java.test.binaries":                p.Config.JavaTest,
-		"-Dsonar.coverage.exclusions":               p.Config.CoverageExclusion,
-		"-Dsonar.java.source":                       p.Config.JavaSource,
-		"-Dsonar.java.libraries":                    p.Config.JavaLibraries,
-		"-Dsonar.surefire.reportsPath":              p.Config.SurefireReportsPath,
-		"-Dsonar.sonar.typescript.lcov.reportPaths": p.Config.TypescriptLcovReportPaths,
-		"-Dsonar.verbose":                           p.Config.Verbose,
-		"-Dsonar.pullrequest.key":                   p.Config.PRKey,
-		"-Dsonar.pullrequest.branch":                p.Config.PRBranch,
-		"-Dsonar.pullrequest.base":                  p.Config.PRBase,
-		"-Djavax.net.ssl.trustStorePassword":        p.Config.SSLKeyStorePassword,
-		"-Djavax.net.ssl.trustStore":                p.Config.CacertsLocation,
+		"-Dsonar.projectKey":                     p.Config.Key,
+		"-Dsonar.projectName":                    p.Config.Name,
+		"-Dsonar.projectVersion":                 p.Config.Version,
+		"-Dsonar.sources":                        p.Config.Sources,
+		"-Dsonar.ws.timeout":                     p.Config.Timeout,
+		"-Dsonar.inclusions":                     p.Config.Inclusions,
+		"-Dsonar.exclusions":                     p.Config.Exclusions,
+		"-Dsonar.log.level":                      p.Config.Level,
+		"-Dsonar.showProfiling":                  p.Config.ShowProfiling,
+		"-Dsonar.java.binaries":                  p.Config.Binaries,
+		"-Dsonar.branch.name":                    p.Config.Branch,
+		"-Dsonar.qualitygate.wait":               strconv.FormatBool(p.Config.WaitQualityGate),
+		"-Dsonar.qualitygate.timeout":            p.Config.QualityTimeout,
+		"-Dsonar.javascript.lcov.reportPaths":    p.Config.JavascitptIcovReport,
+		"-Dsonar.coverage.jacoco.xmlReportPaths": p.Config.JacocoReportPath,
+		"-Dsonar.java.coveragePlugin":            p.Config.JavaCoveragePlugin,
+		"-Dsonar.junit.reportPaths":              p.Config.JunitReportPaths,
+		"-Dsonar.sourceEncoding":                 p.Config.SourceEncoding,
+		"-Dsonar.tests":                          p.Config.SonarTests,
+		"-Dsonar.java.test.binaries":             p.Config.JavaTest,
+		"-Dsonar.coverage.exclusions":            p.Config.CoverageExclusion,
+		"-Dsonar.java.source":                    p.Config.JavaSource,
+		"-Dsonar.java.libraries":                 p.Config.JavaLibraries,
+		"-Dsonar.surefire.reportsPath":           p.Config.SurefireReportsPath,
+		"-Dsonar.typescript.lcov.reportPaths":    p.Config.TypescriptLcovReportPaths,
+		"-Dsonar.verbose":                        p.Config.Verbose,
+		"-Dsonar.pullrequest.key":                p.Config.PRKey,
+		"-Dsonar.pullrequest.branch":             p.Config.PRBranch,
+		"-Dsonar.pullrequest.base":               p.Config.PRBase,
+		"-Djavax.net.ssl.trustStorePassword":     p.Config.SSLKeyStorePassword,
+		"-Djavax.net.ssl.trustStore":             p.Config.CacertsLocation,
 	}
 
 	// Loop over the configurations and add to args if they exist
