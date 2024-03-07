@@ -550,29 +550,40 @@ func (p Plugin) Exec() error {
 				"error": err,
 			}).Fatal("Unable to parse scan results!")
 		}
-		logrus.WithFields(logrus.Fields{
-			"job url": report.CeTaskURL,
-		}).Info("Job url")
-		fmt.Printf("\n")
-		fmt.Printf("\n\nWaiting Analysis to finish:\n\n")
-		fmt.Printf("\n")
 
-		task, err := waitForSonarJob(report)
-
-		if err != nil {
+		if p.Config.WaitQualityGate {
 			logrus.WithFields(logrus.Fields{
-				"error": err,
-			}).Fatal("Unable to get Job state")
-			return err
+				"job url": report.CeTaskURL,
+			}).Info("Job url")
+			fmt.Printf("\n")
+			fmt.Printf("\n\nWaiting Analysis to finish:\n\n")
+			fmt.Printf("\n")
+
+			task, err := waitForSonarJob(report)
+
+			if err != nil {
+				logrus.WithFields(logrus.Fields{
+					"error": err,
+				}).Fatal("Unable to get Job state")
+				return err
+			}
+
+			fmt.Printf("\n")
+			fmt.Printf("#######################################\n")
+			fmt.Printf("Waiting for quality gate validation...\n")
+			fmt.Printf("#######################################\n")
+			fmt.Printf("\n")
+
+			status = getStatus(task, report)
+		} else {
+			fmt.Printf("\n")
+			fmt.Printf("#######################################\n")
+			fmt.Printf("Delaying for quality gate validation...\n")
+			fmt.Printf("#######################################\n")
+			fmt.Printf("\n")
+
+			status = "OK"
 		}
-
-		fmt.Printf("\n")
-		fmt.Printf("#######################################\n")
-		fmt.Printf("Waiting for quality gate validation...\n")
-		fmt.Printf("#######################################\n")
-		fmt.Printf("\n")
-
-		status = getStatus(task, report)
 	}
 
 	fmt.Printf("\n")
@@ -596,7 +607,7 @@ func (p Plugin) Exec() error {
 		// fmt.Printf("\n==> FAILED <==\n")
 		logrus.WithFields(logrus.Fields{
 			"status": status,
-		}).Info("Quality Gate Status FAILED")
+		}).Info("Quality Gate Status disabled")
 	}
 	if status == p.Config.Quality {
 		// fmt.Printf("\n==> QUALITY GATEWAY ENALED \n")
