@@ -409,7 +409,7 @@ func (p Plugin) Exec() error {
 	// Initial values
 	args := []string{
 		"-Dsonar.host.url=" + p.Config.Host,
-		"-Dsonar.login=" + p.Config.Token,
+		"-Dsonar.token=" + p.Config.Token,
 	}
 
 	// Map of potential configurations
