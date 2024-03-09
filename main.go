@@ -261,6 +261,12 @@ func main() {
 			Usage:  "Wait for the SonarQube quality gate",
 			EnvVar: "PLUGIN_WAIT_QUALITYGATE",
 		},
+		cli.StringFlag{
+			Name:   "workspace",
+			Usage:  "sonar workspace execution",
+			Value:  "/harness",
+			EnvVar: "PLUGIN_WORKSPACE",
+		},
 	}
 	app.Run(os.Args)
 }
@@ -308,6 +314,7 @@ func run(c *cli.Context) {
 			TaskId:                    c.String("taskid"),
 			SkipScan:                  c.Bool("skip_scan"),
 			WaitQualityGate:           c.Bool("wait_qualitygate"),
+			Workspace:                 c.String("workspace"),
 		},
 		Output: Output{
 			OutputFile: c.String("output-file"),

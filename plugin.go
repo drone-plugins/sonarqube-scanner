@@ -35,7 +35,7 @@ var (
 
 	// sonarDashStatic is a static string used in the dashboard URL.
 	sonarDashStatic = "/dashboard?id="
-
+	//https://sonar.dfinsolutions.com/dashboard?id=dfinsolutions_Saturn-UI_AYezvlRKNrcjU-xpGTBl&pullRequest=1244
 	// basicAuth is the basic authentication string.
 	basicAuth = "Basic "
 )
@@ -88,6 +88,7 @@ type (
 		TaskId                    string
 		SkipScan                  bool
 		WaitQualityGate           bool
+		Workspace                 string
 	}
 	Output struct {
 		OutputFile string // File where plugin output are saved
@@ -346,6 +347,11 @@ func ParseJunit(projectArray Project, projectName string) Testsuites {
 	os.Setenv("SONAR_RESULT_OVERALL_ERRORS", fmt.Sprintf("%d", errors)) // Set the number of errors as an environment variable
 
 	dashboardLink := os.Getenv("PLUGIN_SONAR_HOST") + sonarDashStatic + os.Getenv("PLUGIN_SONAR_KEY")
+	if os.Getenv("PLUGIN_PR_KEY") != "" {
+		dashboardLink = os.Getenv("PLUGIN_SONAR_HOST") + sonarDashStatic + os.Getenv("PLUGIN_SONAR_KEY") + "&pullRequest=" + os.Getenv("PLUGIN_PR_KEY")
+	} else if os.Getenv("PLUGIN_BRANCHANALYSIS") == "true" {
+		dashboardLink = os.Getenv("PLUGIN_SONAR_HOST") + sonarDashStatic + os.Getenv("PLUGIN_SONAR_KEY") + "&branch=" + os.Getenv("PLUGIN_BRANCH")
+	}
 	SonarJunitReport := &Testsuites{
 		TestSuite: []Testsuite{
 			Testsuite{
@@ -466,6 +472,10 @@ func (p Plugin) Exec() error {
 	if len(p.Config.CustomJvmParams) >= 1 {
 		params := strings.Split(p.Config.CustomJvmParams, ",")
 		args = append(args, params...)
+	}
+
+	if len(p.Config.Workspace) >= 1 {
+		args = append(args, "-Dsonar.projectBaseDir="+p.Config.Workspace)
 	}
 
 	// Assuming your struct has a print or log method
