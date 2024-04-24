@@ -473,11 +473,11 @@ func (p Plugin) Exec() error {
 		params := strings.Split(p.Config.CustomJvmParams, ",")
 		args = append(args, params...)
 	}
-	workspaceFolder := ".scannerwork/report-task.txt"
+	taskFilePath := ".scannerwork/report-task.txt"
 	
 	if len(p.Config.Workspace) >= 1 {
 		args = append(args, "-Dsonar.projectBaseDir="+p.Config.Workspace)
-		workspaceFolder = p.Config.Workspace+"/.scannerwork/report-task.txt"
+		taskFilePath = p.Config.Workspace+"/.scannerwork/report-task.txt"
 	}
 
 	// Assuming your struct has a print or log method
@@ -533,7 +533,7 @@ func (p Plugin) Exec() error {
 		fmt.Printf("\n==> Sonar Analysis Finished!\n\n")
 		fmt.Printf("\n\nStatic Analysis Result:\n\n")
 
-		cmd = exec.Command("cat", workspaceFolder)
+		cmd = exec.Command("cat", taskFilePath)
 
 		cmd.Stdout = os.Stdout
 
@@ -555,7 +555,7 @@ func (p Plugin) Exec() error {
 		fmt.Printf("\n\nParsing Results:\n\n")
 		fmt.Printf("\n")
 
-		report, err := staticScan(&p)
+		report, err := staticScan(&p, taskFilePath)
 
 		if err != nil {
 			logrus.WithFields(logrus.Fields{
@@ -646,9 +646,9 @@ func displayQualityGateStatus(status string, qualityEnabled bool) {
 	fmt.Println(lineBreak)
 }
 
-func staticScan(p *Plugin) (*SonarReport, error) {
+func staticScan(p *Plugin, taskFilePath String) (*SonarReport, error) {
 
-	cmd := exec.Command("sed", "-e", "s/=/=\"/", "-e", "s/$/\"/", ".scannerwork/report-task.txt")
+	cmd := exec.Command("sed", "-e", "s/=/=\"/", "-e", "s/$/\"/", taskFilePath)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
