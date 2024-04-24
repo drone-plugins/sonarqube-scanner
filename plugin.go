@@ -646,7 +646,7 @@ func displayQualityGateStatus(status string, qualityEnabled bool) {
 	fmt.Println(lineBreak)
 }
 
-func staticScan(p *Plugin, taskFilePath String) (*SonarReport, error) {
+func staticScan(p *Plugin, taskFilePath string) (*SonarReport, error) {
 
 	cmd := exec.Command("sed", "-e", "s/=/=\"/", "-e", "s/$/\"/", taskFilePath)
 	output, err := cmd.CombinedOutput()
