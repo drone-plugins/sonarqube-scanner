@@ -473,9 +473,11 @@ func (p Plugin) Exec() error {
 		params := strings.Split(p.Config.CustomJvmParams, ",")
 		args = append(args, params...)
 	}
-
+	workspaceFolder := ".scannerwork/report-task.txt"
+	
 	if len(p.Config.Workspace) >= 1 {
 		args = append(args, "-Dsonar.projectBaseDir="+p.Config.Workspace)
+		workspaceFolder = p.Config.Workspace+"/.scannerwork/report-task.txt"
 	}
 
 	// Assuming your struct has a print or log method
@@ -531,7 +533,7 @@ func (p Plugin) Exec() error {
 		fmt.Printf("\n==> Sonar Analysis Finished!\n\n")
 		fmt.Printf("\n\nStatic Analysis Result:\n\n")
 
-		cmd = exec.Command("cat", ".scannerwork/report-task.txt")
+		cmd = exec.Command("cat", workspaceFolder)
 
 		cmd.Stdout = os.Stdout
 
