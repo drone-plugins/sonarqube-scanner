@@ -168,7 +168,7 @@ spec:
 - `pr_base`: PR Base.
   - Example: `"pr_base": "your-pr-base"`
 - `coverage_exclusion`: Sonar coverage exclusions.
-  - Example: `"coverage_exclusion": "*.test.go"`
+  - Example: `"coverage_exclusion": "**/test/**/*.*,**/*.test.go"`
 - `java_source`: Sonar Java source.
   - Example: `"java_source": "1.8"`
 - `java_libraries`: Sonar Java libraries.
