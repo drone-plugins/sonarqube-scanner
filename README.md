@@ -3,7 +3,7 @@
 
 This plugin is designed to run SonarQube scans and handle the results and convert it to JUnit Format. It's written in Go and check the report results for status OK.
 
-## Main Features - v2.0.2-java17
+## Main Features - v2.2.1
 
 - Execute SonarQube scans and handle the results
 - Generate JUnit reports based on the scan results
@@ -23,12 +23,12 @@ Obs: USe branch and pr_key params for accuracy results matches when skiping the 
     identifier: run_sonar
     spec:
         connectorRef: account.DockerHubDiego
-        image: plugins/sonarqube-scanner:v2.0.2-java17
+        image: plugins/sonarqube-scanner:v2.2.1
         reports:
             type: JUnit
             spec:
                 paths:
-                  - "**/**/*.xml"
+                  - "SonarResults.xml"
         privileged: false
         settings:
             sonar_host: http://34.100.11.50
@@ -45,12 +45,12 @@ Obs: USe branch and pr_key params for accuracy results matches when skiping the 
 type: Plugin
 spec:
     connectorRef: <+input>
-    image: plugins/sonarqube-scanner:v2.0.2-java17
+    image: plugins/sonarqube-scanner:v2.2.1
     reports:
         type: JUnit
         spec:
             paths:
-              - "**/**/*.xml"
+              - "SonarResults.xml"
     settings:
         sonar_key: <+input>
         sonar_name: <+input>
@@ -85,12 +85,12 @@ spec:
     identifier: check_sonar
     spec:
         connectorRef: account.DockerHubDiego
-        image: plugins/sonarqube-scanner:v2.0.2-java17
+        image: plugins/sonarqube-scanner:v2.2.1
         reports:
             type: JUnit
             spec:
                 paths:
-                  - "**/**/*.xml"
+                  - "SonarResults.xml"
         privileged: false
         settings:
             sonar_host: https://sonarcloud.io
@@ -121,7 +121,7 @@ spec:
 - `inclusions`: The files to be included in the analysis.
   - Example: `"inclusions": "*.go, *.java"`
 - `exclusions`: The files to be excluded from the analysis.
-  - Example: `"exclusions": "*.test.go"`
+  - Example: `"exclusions": "**/test/**/*.*,**/*.test.go"`
 - `level`: The logging level.
   - Example: `"level": "INFO"`
 - `showProfiling`: Enable profiling during analysis.
@@ -167,7 +167,7 @@ spec:
 - `pr_base`: PR Base.
   - Example: `"pr_base": "your-pr-base"`
 - `coverage_exclusion`: Sonar coverage exclusions.
-  - Example: `"coverage_exclusion": "*.test.go"`
+  - Example: `"coverage_exclusion": "**/test/**/*.*,**/*.test.go"`
 - `java_source`: Sonar Java source.
   - Example: `"java_source": "1.8"`
 - `java_libraries`: Sonar Java libraries.
