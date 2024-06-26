@@ -1033,7 +1033,8 @@ func GetLatestTaskID(sonarHost string, projectSlug string) (string, error) {
 	}
 
 	// If Forbidden, try with Basic Auth
-	if taskResponse.StatusCode == http.StatusForbidden {
+	// if taskResponse.StatusCode == http.StatusForbidden {
+	if taskResponse.StatusCode != http.StatusOK {
 		fmt.Printf("\nRetrying with Basic Auth...\n")
 		addBasicAuth(taskRequest, sonarToken)
 		taskResponse, err = netClient.Do(taskRequest)
