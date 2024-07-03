@@ -29,7 +29,7 @@ Obs: USe branch and pr_key params for accuracy results matches when skiping the 
             type: JUnit
             spec:
                 paths:
-                  - "SonarResults.xml"
+                  - "sonarResults.xml"
         privileged: false
         settings:
             sonar_host: http://34.100.11.50
@@ -51,7 +51,7 @@ spec:
         type: JUnit
         spec:
             paths:
-              - "SonarResults.xml"
+              - "sonarResults.xml"
     settings:
         sonar_key: <+input>
         sonar_name: <+input>
@@ -91,7 +91,7 @@ spec:
             type: JUnit
             spec:
                 paths:
-                  - "SonarResults.xml"
+                  - "sonarResults.xml"
         privileged: false
         settings:
             sonar_host: https://sonarcloud.io
