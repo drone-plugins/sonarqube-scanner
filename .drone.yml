@@ -19,13 +19,13 @@ steps:
     when:
       ref:
         - "refs/pull/**" # Only run for pull requests
-  - name: publish-2.3.0
+  - name: publish-2.3.1
     image: plugins/docker:20
     settings:
       # auto_tag: true
       # auto_tag_suffix: v2.0.2-java17
       tags:
-        - v2.3.0
+        - v2.3.1
         # - latest
         # - stable-java17
       daemon_off: false
