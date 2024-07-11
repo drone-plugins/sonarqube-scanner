@@ -13,9 +13,9 @@ RUN go get github.com/urfave/cli
 RUN go get github.com/joho/godotenv
 RUN GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o harness-sonar
 
-FROM amazoncorretto:17.0.8-alpine3.18
+FROM amazoncorretto:17.0.11-alpine3.19
 
-ARG SONAR_VERSION=6.0.0.4432
+ARG SONAR_VERSION=5.0.1.3006
 ARG SONAR_SCANNER_CLI=sonar-scanner-cli-${SONAR_VERSION}
 ARG SONAR_SCANNER=sonar-scanner-${SONAR_VERSION}
 
