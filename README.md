@@ -3,9 +3,9 @@
 
 This plugin is designed to run SonarQube scans and handle the results and convert it to JUnit Format. It's written in Go and check the report results for status OK.
 
-## Main Features - v2.3.0
+## Main Features - v2.4.1
 
-- Sonar CLI updated to 6.0.0.4432
+- Sonar CLI updated from 6.0.0.4432 to 5.0.1.3006
 - Execute SonarQube scans and handle the results
 - Generate JUnit reports based on the scan results
 - Quality Gate status reporting + Metrics
@@ -24,7 +24,7 @@ Obs: USe branch and pr_key params for accuracy results matches when skiping the 
     identifier: run_sonar
     spec:
         connectorRef: account.DockerHubDiego
-        image: plugins/sonarqube-scanner:v2.3.0
+        image: plugins/sonarqube-scanner:v2.4.1
         reports:
             type: JUnit
             spec:
@@ -46,7 +46,7 @@ Obs: USe branch and pr_key params for accuracy results matches when skiping the 
 type: Plugin
 spec:
     connectorRef: <+input>
-    image: plugins/sonarqube-scanner:v2.3.0
+    image: plugins/sonarqube-scanner:v2.4.1
     reports:
         type: JUnit
         spec:
@@ -86,7 +86,7 @@ spec:
     identifier: check_sonar
     spec:
         connectorRef: account.DockerHubDiego
-        image: plugins/sonarqube-scanner:v2.3.0
+        image: plugins/sonarqube-scanner:v2.4.1
         reports:
             type: JUnit
             spec:
@@ -108,7 +108,7 @@ name: default
 
 steps:
 - name: perform-code-analysis
-  image: plugins/sonarqube-scanner:v2.3.0
+  image: plugins/sonarqube-scanner:v2.4.1
   settings:
     sonar_host: http://34.100.11.50
     sonar_token:
