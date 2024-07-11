@@ -10,6 +10,8 @@ This plugin is designed to run SonarQube scans and handle the results and conver
 - Generate JUnit reports based on the scan results
 - Quality Gate status reporting + Metrics
 - Skip Scan and only check for quality Gate Status of a specific analysisId or last analysis
+- Waiting for Analysis and QualityGate nows skip the wait if set to false - thanks @kangguru
+- Added SONAR_SCANNER_OPTS as param, so it transform into this env var during execution for Sonar JVM params - check for the param detail section below
 
 Obs: USe branch and pr_key params for accuracy results matches when skiping the scan
 
@@ -207,6 +209,8 @@ steps:
   - Example: `"taskid": "your-task-id"`
 - `skip_scan`: Skip Sonar analysis scan - get last analysis automatically.
   - Example: `"skip_scan": true`
+- `SONAR_SCANNER_OPTS`: pass any Sonar JVM param as env var during execution.
+  - Example: `"SONAR_SCANNER_OPTS": "--add-opens java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED"`
 
 Detail Informations/tutorials Parameteres: [DOCS.md](DOCS.md).
 
