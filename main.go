@@ -320,7 +320,7 @@ func run(c *cli.Context) {
 			SkipScan:                  c.Bool("skip_scan"),
 			WaitQualityGate:           c.Bool("wait_qualitygate"),
 			Workspace:                 c.String("workspace"),
-			SonarOPS                   c.String("sonar_scanner_opts"),
+			SonarOPS:                  c.String("sonar_scanner_opts"),
 		},
 		Output: Output{
 			OutputFile: c.String("output-file"),
