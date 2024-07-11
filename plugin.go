@@ -89,6 +89,7 @@ type (
 		SkipScan                  bool
 		WaitQualityGate           bool
 		Workspace                 string
+		SonarOPS		  string
 	}
 	Output struct {
 		OutputFile string // File where plugin output are saved
