@@ -474,6 +474,13 @@ func (p Plugin) Exec() error {
 		params := strings.Split(p.Config.CustomJvmParams, ",")
 		args = append(args, params...)
 	}
+
+	if len(p.Config.SonarOPS) >= 1 {
+		existingOpts := os.Getenv("SONAR_SCANNER_OPTS")
+		newOpts := existingOpts + " " + p.Config.SonarOPS
+		os.Setenv("SONAR_SCANNER_OPTS", newOpts)
+	}
+	
 	taskFilePath := ".scannerwork/report-task.txt"
 	
 	if len(p.Config.Workspace) >= 1 {
