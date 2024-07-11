@@ -267,6 +267,11 @@ func main() {
 			Value:  "/harness",
 			EnvVar: "PLUGIN_WORKSPACE",
 		},
+		cli.StringFlag{
+			Name:   "sonar_scanner_opts",
+			Usage:  "sonar scanner jvm ops",
+			EnvVar: "PLUGIN_SONAR_SCANNER_OPTS",
+		},
 	}
 	app.Run(os.Args)
 }
@@ -315,6 +320,7 @@ func run(c *cli.Context) {
 			SkipScan:                  c.Bool("skip_scan"),
 			WaitQualityGate:           c.Bool("wait_qualitygate"),
 			Workspace:                 c.String("workspace"),
+			SonarOPS:                  c.String("sonar_scanner_opts"),
 		},
 		Output: Output{
 			OutputFile: c.String("output-file"),

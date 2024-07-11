@@ -13,7 +13,7 @@ RUN go get github.com/urfave/cli
 RUN go get github.com/joho/godotenv
 RUN GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o harness-sonar
 
-FROM amazoncorretto:17.0.8-alpine3.18
+FROM amazoncorretto:17.0.11-alpine3.19
 
 ARG SONAR_VERSION=5.0.1.3006
 ARG SONAR_SCANNER_CLI=sonar-scanner-cli-${SONAR_VERSION}
@@ -23,7 +23,7 @@ ARG SONAR_SCANNER=sonar-scanner-${SONAR_VERSION}
 #     && apt-get install -y nodejs curl \
 #     && apt-get clean
 
-RUN apk --no-cache --update add nodejs curl unzip git php python3 py3-pip maven gcc g++ make ruby ruby-dev perl
+RUN apk --no-cache --update add nodejs-current npm curl unzip git php python3 py3-pip maven gcc g++ make ruby ruby-dev perl
 
 COPY --from=build /go/src/github.com/diegopereiraeng/harness-cie-sonarqube-scanner/harness-sonar /bin/
 WORKDIR /bin
