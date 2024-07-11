@@ -101,6 +101,26 @@ spec:
             skip_scan: true
 ```
 
+### DRONE Pipeline example
+```yaml
+kind: pipeline
+name: default
+
+steps:
+- name: perform-code-analysis
+  image: plugins/sonarqube-scanner:v2.3.0
+  settings:
+    sonar_host: http://34.100.11.50
+    sonar_token:
+      from_secret: sonar_token
+    sources: .
+    binaries: .
+    sonar_name: sonarqube-scanner
+    sonar_key: sonarqube-scanner
+```
+
+
+
 ### Configuration Parameters
 
 - `key`: The project key in SonarQube.
