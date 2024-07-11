@@ -5,7 +5,7 @@ This plugin is designed to run SonarQube scans and handle the results and conver
 
 ## Main Features - v2.4.1
 
-- Sonar CLI updated from 6.0.0.4432 to 5.0.1.3006
+- Sonar CLI downgraded from 6.0.0.4432 to 5.0.1.3006
 - Execute SonarQube scans and handle the results
 - Generate JUnit reports based on the scan results
 - Quality Gate status reporting + Metrics
