@@ -595,11 +595,12 @@ func (p Plugin) Exec() error {
 	displayQualityGateStatus(status, p.Config.QualityEnabled == "true")
 
 	if status != p.Config.Quality && p.Config.QualityEnabled == "true" {
+		os.Exit(5)
 		fmt.Fprintln(os.Stderr, "ERROR: QualityGate status failed.")
 		logrus.WithFields(logrus.Fields{
 			"status": status,
 		}).Fatal("QualityGate status failed")
-		os.Exit(5)
+		
 	}
 	if status != p.Config.Quality && p.Config.QualityEnabled == "false" {
 		logrus.WithFields(logrus.Fields{
