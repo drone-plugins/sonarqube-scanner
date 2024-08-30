@@ -45,8 +45,6 @@ const (
 	lineBreak2 = "|----------------------------------------------------------------|"
 )
 
-
-
 type (
 	Config struct {
 		Key                       string
@@ -91,7 +89,7 @@ type (
 		SkipScan                  bool
 		WaitQualityGate           bool
 		Workspace                 string
-		SonarOPS		  string
+		SonarOPS                  string
 	}
 	Output struct {
 		OutputFile string // File where plugin output are saved
@@ -185,8 +183,6 @@ type (
 		Message string `xml:"message,attr"`
 	}
 )
-
-
 
 type AnalysisResponse struct {
 	Analyses []struct {
@@ -516,7 +512,9 @@ func (p Plugin) Exec() error {
 
 	if p.Config.TaskId != "" || p.Config.SkipScan {
 		fmt.Println("Skipping Scan...")
-		fmt.Println("\nWaiting for quality gate validation...\n")
+		fmt.Println("")
+		fmt.Println("Waiting for quality gate validation...")
+		fmt.Println("")
 		status, err = PreFlightGetLatestTaskID(p.Config)
 		if err != nil {
 			fmt.Printf("\n\n==> Error getting the latest scanID\n\n")
@@ -524,7 +522,8 @@ func (p Plugin) Exec() error {
 			return err
 		}
 	} else {
-		fmt.Println("Starting Analysis\n")
+		fmt.Println("Starting Analysis")
+		fmt.Println("")
 		cmd := exec.Command("sonar-scanner", args...)
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
@@ -534,7 +533,13 @@ func (p Plugin) Exec() error {
 			logConfigInfo("Error", err.Error())
 			// return err
 		}
-		fmt.Println("\n==> Sonar Analysis Finished!\n\nStatic Analysis Result:\n\n")
+		fmt.Println("")
+		fmt.Println("==> Sonar Analysis Finished!")
+		fmt.Println("")
+		fmt.Println("")
+		fmt.Println("Static Analysis Result:")
+		fmt.Println("")
+		fmt.Println("")
 
 		cmd = exec.Command("cat", taskFilePath)
 		cmd.Stdout = os.Stdout
@@ -570,21 +575,25 @@ func (p Plugin) Exec() error {
 				return err
 			}
 
-			fmt.Println("Waiting for quality gate validation...\n")
+			fmt.Println("Waiting for quality gate validation...")
+			fmt.Println("")
 
 			status = getStatus(task, report)
 		} else {
-			fmt.Println("Delaying for quality gate validation...\n")
+			fmt.Println("Delaying for quality gate validation...")
+			fmt.Println("")
 			status = "OK"
 		}
 	}
-
-	fmt.Println("\n==> SONAR PROJECT DASHBOARD <==")
+	fmt.Println("")
+	fmt.Println("==> SONAR PROJECT DASHBOARD <==")
+	fmt.Println("")
 	fmt.Println(p.Config.Host + sonarDashStatic + p.Config.Key)
-	fmt.Println("\n==> Harness CIE SonarQube Plugin with Quality Gateway <==\n")
+	fmt.Println("==> Harness CIE SonarQube Plugin with Quality Gateway <==")
+	fmt.Println("")
 
 	displayQualityGateStatus(status, p.Config.QualityEnabled == "true")
-	
+
 	if status != p.Config.Quality && p.Config.QualityEnabled == "true" {
 		fmt.Fprintln(os.Stderr, "ERROR: QualityGate status failed.")
 		logrus.WithFields(logrus.Fields{
@@ -684,9 +693,6 @@ func getStatus(task *TaskResponse, report *SonarReport) string {
 		}
 	}
 
-	// reportRequest := url.Values{
-	// 	"analysisId": {task.Task.AnalysisID},
-	// }
 	sonarToken := os.Getenv("PLUGIN_SONAR_TOKEN")
 
 	// First try with Basic Auth
@@ -810,12 +816,12 @@ func getStatusID(taskIDOld string, sonarHost string, projectSlug string) (string
 	qg_projectKey := os.Getenv("PLUGIN_SONAR_KEY")
 
 	fmt.Printf("%+v", projectReport)
-	fmt.Printf("\n")
+	fmt.Println("")
 	result := ParseJunit(projectReport, qg_projectKey)
 	file, _ := xml.MarshalIndent(result, "", " ")
 	_ = os.WriteFile("sonarResults.xml", file, 0644)
 
-	fmt.Printf("\n")
+	fmt.Println("")
 	fmt.Printf("\n======> JUNIT Exporter <======\n")
 
 	//JUNIT
