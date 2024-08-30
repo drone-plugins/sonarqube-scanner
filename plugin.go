@@ -45,6 +45,8 @@ const (
 	lineBreak2 = "|----------------------------------------------------------------|"
 )
 
+
+
 type (
 	Config struct {
 		Key                       string
@@ -183,6 +185,8 @@ type (
 		Message string `xml:"message,attr"`
 	}
 )
+
+
 
 type AnalysisResponse struct {
 	Analyses []struct {
@@ -413,113 +417,106 @@ func PreFlightGetLatestTaskID(config Config) (string, error) {
 }
 
 func (p Plugin) Exec() error {
-	// Initial values
-	args := []string{
-		"-Dsonar.host.url=" + p.Config.Host,
-		"-Dsonar.login=" + p.Config.Token,
-	}
+	// Check if the sonar-project.properties file exists in the current directory
+	sonarConfigFile := "sonar-project.properties"
+	_, err := os.Stat(sonarConfigFile)
 
-	// Map of potential configurations
-	configurations := map[string]string{
-		"-Dsonar.projectKey":                     p.Config.Key,
-		"-Dsonar.projectName":                    p.Config.Name,
-		"-Dsonar.projectVersion":                 p.Config.Version,
-		"-Dsonar.sources":                        p.Config.Sources,
-		"-Dsonar.ws.timeout":                     p.Config.Timeout,
-		"-Dsonar.inclusions":                     p.Config.Inclusions,
-		"-Dsonar.exclusions":                     p.Config.Exclusions,
-		"-Dsonar.log.level":                      p.Config.Level,
-		"-Dsonar.showProfiling":                  p.Config.ShowProfiling,
-		"-Dsonar.java.binaries":                  p.Config.Binaries,
-		"-Dsonar.branch.name":                    p.Config.Branch,
-		"-Dsonar.qualitygate.wait":               strconv.FormatBool(p.Config.WaitQualityGate),
-		"-Dsonar.qualitygate.timeout":            p.Config.QualityTimeout,
-		"-Dsonar.javascript.lcov.reportPaths":    p.Config.JavascitptIcovReport,
-		"-Dsonar.coverage.jacoco.xmlReportPaths": p.Config.JacocoReportPath,
-		"-Dsonar.java.coveragePlugin":            p.Config.JavaCoveragePlugin,
-		"-Dsonar.junit.reportPaths":              p.Config.JunitReportPaths,
-		"-Dsonar.sourceEncoding":                 p.Config.SourceEncoding,
-		"-Dsonar.tests":                          p.Config.SonarTests,
-		"-Dsonar.java.test.binaries":             p.Config.JavaTest,
-		"-Dsonar.coverage.exclusions":            p.Config.CoverageExclusion,
-		"-Dsonar.java.source":                    p.Config.JavaSource,
-		"-Dsonar.java.libraries":                 p.Config.JavaLibraries,
-		"-Dsonar.surefire.reportsPath":           p.Config.SurefireReportsPath,
-		"-Dsonar.typescript.lcov.reportPaths":    p.Config.TypescriptLcovReportPaths,
-		"-Dsonar.verbose":                        p.Config.Verbose,
-		"-Dsonar.pullrequest.key":                p.Config.PRKey,
-		"-Dsonar.pullrequest.branch":             p.Config.PRBranch,
-		"-Dsonar.pullrequest.base":               p.Config.PRBase,
-		"-Djavax.net.ssl.trustStorePassword":     p.Config.SSLKeyStorePassword,
-		"-Djavax.net.ssl.trustStore":             p.Config.CacertsLocation,
-	}
-
-	// Loop over the configurations and add to args if they exist
-	for config, value := range configurations {
-		if len(value) >= 1 {
-			args = append(args, config+"="+value)
+	args := []string{}
+	if os.IsNotExist(err) {
+		// If the configuration file does not exist, use the default parameters
+		fmt.Println("Configuration file not found. Using default parameters.")
+		args = []string{
+			"-Dsonar.host.url=" + p.Config.Host,
+			"-Dsonar.login=" + p.Config.Token,
 		}
+
+		// Map of potential configurations
+		configurations := map[string]string{
+			"-Dsonar.projectKey":                     p.Config.Key,
+			"-Dsonar.projectName":                    p.Config.Name,
+			"-Dsonar.projectVersion":                 p.Config.Version,
+			"-Dsonar.sources":                        p.Config.Sources,
+			"-Dsonar.ws.timeout":                     p.Config.Timeout,
+			"-Dsonar.inclusions":                     p.Config.Inclusions,
+			"-Dsonar.exclusions":                     p.Config.Exclusions,
+			"-Dsonar.log.level":                      p.Config.Level,
+			"-Dsonar.showProfiling":                  p.Config.ShowProfiling,
+			"-Dsonar.java.binaries":                  p.Config.Binaries,
+			"-Dsonar.branch.name":                    p.Config.Branch,
+			"-Dsonar.qualitygate.wait":               strconv.FormatBool(p.Config.WaitQualityGate),
+			"-Dsonar.qualitygate.timeout":            p.Config.QualityTimeout,
+			"-Dsonar.javascript.lcov.reportPaths":    p.Config.JavascitptIcovReport,
+			"-Dsonar.coverage.jacoco.xmlReportPaths": p.Config.JacocoReportPath,
+			"-Dsonar.java.coveragePlugin":            p.Config.JavaCoveragePlugin,
+			"-Dsonar.junit.reportPaths":              p.Config.JunitReportPaths,
+			"-Dsonar.sourceEncoding":                 p.Config.SourceEncoding,
+			"-Dsonar.tests":                          p.Config.SonarTests,
+			"-Dsonar.java.test.binaries":             p.Config.JavaTest,
+			"-Dsonar.coverage.exclusions":            p.Config.CoverageExclusion,
+			"-Dsonar.java.source":                    p.Config.JavaSource,
+			"-Dsonar.java.libraries":                 p.Config.JavaLibraries,
+			"-Dsonar.surefire.reportsPath":           p.Config.SurefireReportsPath,
+			"-Dsonar.typescript.lcov.reportPaths":    p.Config.TypescriptLcovReportPaths,
+			"-Dsonar.verbose":                        p.Config.Verbose,
+			"-Dsonar.pullrequest.key":                p.Config.PRKey,
+			"-Dsonar.pullrequest.branch":             p.Config.PRBranch,
+			"-Dsonar.pullrequest.base":               p.Config.PRBase,
+			"-Djavax.net.ssl.trustStorePassword":     p.Config.SSLKeyStorePassword,
+			"-Djavax.net.ssl.trustStore":             p.Config.CacertsLocation,
+		}
+
+		// Add configurations to args
+		for config, value := range configurations {
+			if len(value) >= 1 {
+				args = append(args, config+"="+value)
+			}
+		}
+
+		// Additional conditions for args
+		if len(p.Config.Verbose) >= 1 {
+			args = append(args, "-X")
+		}
+
+		if !p.Config.UsingProperties {
+			args = append(args, "-Dsonar.scm.provider=git")
+		}
+
+		if len(p.Config.CustomJvmParams) >= 1 {
+			params := strings.Split(p.Config.CustomJvmParams, ",")
+			args = append(args, params...)
+		}
+
+		if len(p.Config.SonarOPS) >= 1 {
+			existingOpts := os.Getenv("SONAR_SCANNER_OPTS")
+			newOpts := existingOpts + " " + p.Config.SonarOPS
+			os.Setenv("SONAR_SCANNER_OPTS", newOpts)
+		}
+
+		if len(p.Config.Workspace) >= 1 {
+			args = append(args, "-Dsonar.projectBaseDir="+p.Config.Workspace)
+		}
+	} else if err == nil {
+		// Configuration file exists, let sonar-scanner use it without additional parameters
+		fmt.Println("Configuration file found. Using sonar-project.properties.")
+	} else {
+		// Error checking the file
+		return fmt.Errorf("error checking configuration file: %v", err)
 	}
 
-	// Special conditions
-	if len(p.Config.Verbose) >= 1 {
-		args = append(args, "-X")
-	}
-
-	if !p.Config.UsingProperties {
-		args = append(args, "-Dsonar.scm.provider=git")
-	}
-
-	if len(p.Config.CustomJvmParams) >= 1 {
-		params := strings.Split(p.Config.CustomJvmParams, ",")
-		args = append(args, params...)
-	}
-
-	if len(p.Config.SonarOPS) >= 1 {
-		existingOpts := os.Getenv("SONAR_SCANNER_OPTS")
-		newOpts := existingOpts + " " + p.Config.SonarOPS
-		os.Setenv("SONAR_SCANNER_OPTS", newOpts)
-	}
-	
-	taskFilePath := ".scannerwork/report-task.txt"
-	
-	if len(p.Config.Workspace) >= 1 {
-		args = append(args, "-Dsonar.projectBaseDir="+p.Config.Workspace)
-		taskFilePath = p.Config.Workspace+"/.scannerwork/report-task.txt"
-	}
-
-	// Assuming your struct has a print or log method
-	if len(p.Config.JacocoReportPath) >= 1 {
-		fmt.Printf("\n\n==> Sonar Java Plugin Jacoco configured!\n\n")
-		fmt.Printf("\n\n==> -Dsonar.coverage.jacoco.xmlReportPaths=" + p.Config.JacocoReportPath + "\n\n")
-	}
-
-	if len(p.Config.JavaCoveragePlugin) >= 1 {
-		fmt.Printf("\n\n==> Sonar Java Plugin Jacoco Path configured!\n\n")
-	}
-
-	os.Setenv("SONAR_USER_HOME", ".sonar")
-
-	fmt.Printf("\n\n")
-	fmt.Printf("Starting Plugin - Sonar Scanner Quality Gate Report")
-	fmt.Printf("\n")
-	fmt.Printf("Developed by Diego Pereira")
-	fmt.Printf("\n")
-	fmt.Printf("sonar Arguments:")
-	fmt.Printf("%v", args)
-	fmt.Printf("\n")
-	fmt.Printf("\n")
+	// Output sonar-scanner information
+	fmt.Printf("\n\nStarting Plugin - Sonar Scanner Quality Gate Report\n")
+	fmt.Printf("Developed by Diego Pereira\n")
+	fmt.Printf("sonar Arguments: %v\n\n", args)
 
 	status := ""
+	taskFilePath := ".scannerwork/report-task.txt"
+	if len(p.Config.Workspace) >= 1 {
+		taskFilePath = p.Config.Workspace + "/.scannerwork/report-task.txt"
+	}
 
 	if p.Config.TaskId != "" || p.Config.SkipScan {
-		fmt.Printf("Skipping Scan...")
-		fmt.Printf("\n")
-		fmt.Printf("\n")
-		fmt.Printf("#######################################\n")
-		fmt.Printf("Waiting for quality gate validation...\n")
-		fmt.Printf("#######################################\n")
-		var err error
+		fmt.Println("Skipping Scan...")
+		fmt.Println("\nWaiting for quality gate validation...\n")
 		status, err = PreFlightGetLatestTaskID(p.Config)
 		if err != nil {
 			fmt.Printf("\n\n==> Error getting the latest scanID\n\n")
@@ -527,8 +524,7 @@ func (p Plugin) Exec() error {
 			return err
 		}
 	} else {
-		fmt.Printf("Starting Analisys")
-		fmt.Printf("\n")
+		fmt.Println("Starting Analysis\n")
 		cmd := exec.Command("sonar-scanner", args...)
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
@@ -536,23 +532,14 @@ func (p Plugin) Exec() error {
 		if err != nil {
 			fmt.Printf("\n\n==> Error in Analysis\n\n")
 			logConfigInfo("Error", err.Error())
-			//return err
+			// return err
 		}
-		fmt.Printf("\n==> Sonar Analysis Finished!\n\n")
-		fmt.Printf("\n\nStatic Analysis Result:\n\n")
+		fmt.Println("\n==> Sonar Analysis Finished!\n\nStatic Analysis Result:\n\n")
 
 		cmd = exec.Command("cat", taskFilePath)
-
 		cmd.Stdout = os.Stdout
-
 		cmd.Stderr = os.Stderr
-		fmt.Printf("\n")
-		fmt.Printf("#######################################\n")
-		fmt.Printf("==> Report Result:\n")
-		fmt.Printf("#######################################\n")
-		fmt.Printf("\n")
 		err = cmd.Run()
-
 		if err != nil {
 			logrus.WithFields(logrus.Fields{
 				"error": err,
@@ -561,10 +548,8 @@ func (p Plugin) Exec() error {
 		}
 
 		fmt.Printf("\n\nParsing Results:\n\n")
-		fmt.Printf("\n")
 
 		report, err := staticScan(&p, taskFilePath)
-
 		if err != nil {
 			logrus.WithFields(logrus.Fields{
 				"error": err,
@@ -575,12 +560,9 @@ func (p Plugin) Exec() error {
 			logrus.WithFields(logrus.Fields{
 				"job url": report.CeTaskURL,
 			}).Info("Job url")
-			fmt.Printf("\n")
 			fmt.Printf("\n\nWaiting Analysis to finish:\n\n")
-			fmt.Printf("\n")
 
 			task, err := waitForSonarJob(report)
-
 			if err != nil {
 				logrus.WithFields(logrus.Fields{
 					"error": err,
@@ -588,50 +570,34 @@ func (p Plugin) Exec() error {
 				return err
 			}
 
-			fmt.Printf("\n")
-			fmt.Printf("#######################################\n")
-			fmt.Printf("Waiting for quality gate validation...\n")
-			fmt.Printf("#######################################\n")
-			fmt.Printf("\n")
+			fmt.Println("Waiting for quality gate validation...\n")
 
 			status = getStatus(task, report)
 		} else {
-			fmt.Printf("\n")
-			fmt.Printf("#######################################\n")
-			fmt.Printf("Delaying for quality gate validation...\n")
-			fmt.Printf("#######################################\n")
-			fmt.Printf("\n")
-
+			fmt.Println("Delaying for quality gate validation...\n")
 			status = "OK"
 		}
 	}
 
-	fmt.Printf("\n")
-	fmt.Printf("==> SONAR PROJECT DASHBOARD <==\n")
-	fmt.Printf(p.Config.Host)
-	fmt.Printf(sonarDashStatic)
-	fmt.Printf(p.Config.Key)
-	fmt.Printf("\n==> Harness CIE SonarQube Plugin with Quality Gateway <==\n\n")
-	// "Docker", p.Config.ArtifactFile, (p.Config.Host + sonarDashStatic + p.Config.Name), "Sonar", "Harness Sonar Plugin", []string{"Diego", "latest"})
+	fmt.Println("\n==> SONAR PROJECT DASHBOARD <==")
+	fmt.Println(p.Config.Host + sonarDashStatic + p.Config.Key)
+	fmt.Println("\n==> Harness CIE SonarQube Plugin with Quality Gateway <==\n")
 
 	displayQualityGateStatus(status, p.Config.QualityEnabled == "true")
-
+	
 	if status != p.Config.Quality && p.Config.QualityEnabled == "true" {
-		// fmt.Printf("\n==> QUALITY ENABLED ENALED  - set quality_gate_enabled as false to disable qg\n")
+		fmt.Fprintln(os.Stderr, "ERROR: QualityGate status failed.")
 		logrus.WithFields(logrus.Fields{
 			"status": status,
 		}).Fatal("QualityGate status failed")
+		os.Exit(5)
 	}
 	if status != p.Config.Quality && p.Config.QualityEnabled == "false" {
-		// fmt.Printf("\n==> QUALITY GATEWAY DISABLED\n")
-		// fmt.Printf("\n==> FAILED <==\n")
 		logrus.WithFields(logrus.Fields{
 			"status": status,
 		}).Info("Quality Gate Status disabled")
 	}
 	if status == p.Config.Quality {
-		// fmt.Printf("\n==> QUALITY GATEWAY ENALED \n")
-		// fmt.Printf("\n==> PASSED <==\n")
 		logrus.WithFields(logrus.Fields{
 			"status": status,
 		}).Info("Quality Gate Status Success")
