@@ -422,6 +422,15 @@ func (p Plugin) Exec() error {
 
 	args := []string{}
 
+	// Additional conditions for args
+	if len(p.Config.Verbose) >= 1 {
+		args = append(args, "-X")
+	}
+
+	if len(p.Config.Workspace) >= 1 {
+		args = append(args, "-Dsonar.projectBaseDir="+p.Config.Workspace)
+	}
+
 	if os.IsNotExist(err) && p.Config.UseSonarConfigFile {
 		// If the configuration file does not exist, use the default parameters
 		fmt.Println("Configuration file not found. Using default parameters.")
@@ -472,11 +481,6 @@ func (p Plugin) Exec() error {
 			}
 		}
 
-		// Additional conditions for args
-		if len(p.Config.Verbose) >= 1 {
-			args = append(args, "-X")
-		}
-
 		if !p.Config.UsingProperties {
 			args = append(args, "-Dsonar.scm.provider=git")
 		}
@@ -492,9 +496,6 @@ func (p Plugin) Exec() error {
 			os.Setenv("SONAR_SCANNER_OPTS", newOpts)
 		}
 
-		if len(p.Config.Workspace) >= 1 {
-			args = append(args, "-Dsonar.projectBaseDir="+p.Config.Workspace)
-		}
 	} else if err == nil {
 		// Configuration file exists, let sonar-scanner use it without additional parameters
 		fmt.Println("Configuration file found. Using sonar-project.properties.")
@@ -509,13 +510,9 @@ func (p Plugin) Exec() error {
 			args = append(args, "-Dsonar.login="+p.Config.Token)
 		}
 
-		if len(p.Config.Token) >= 1 && p.Config.UseSonarConfigFileOverride {
-			fmt.Println("OVERRIDING sonar.login=" + p.Config.Token)
+		if len(p.Config.Key) >= 1 && p.Config.UseSonarConfigFileOverride {
+			fmt.Println("OVERRIDING sonar.projectKey=" + p.Config.Key)
 			args = append(args, "-Dsonar.projectKey="+p.Config.Key)
-		}
-
-		if len(p.Config.Workspace) >= 1 {
-			args = append(args, "-Dsonar.projectBaseDir="+p.Config.Workspace)
 		}
 
 	} else {
