@@ -252,6 +252,12 @@ steps:
 
 Detail Informations/tutorials Parameteres: [DOCS.md](DOCS.md).
 
+### Sonar Token
+
+Use Global analysis tokens
+
+<img src="https://github.com/drone-plugins/sonarqube-scanner/blob/main/global-analysis-token.png" alt="Plugin Configuration" width="400"/>
+
 ### Build Process
 
 build go binary file: 
