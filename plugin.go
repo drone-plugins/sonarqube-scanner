@@ -418,7 +418,6 @@ func PreFlightGetLatestTaskID(config Config) (string, error) {
 func (p Plugin) Exec() error {
 	// Check if the sonar-project.properties file exists in the current directory
 	sonarConfigFile := "sonar-project.properties"
-	_, err := os.Stat(sonarConfigFile)
 
 	args := []string{}
 
@@ -430,6 +429,8 @@ func (p Plugin) Exec() error {
 	if len(p.Config.Workspace) >= 1 {
 		args = append(args, "-Dsonar.projectBaseDir="+p.Config.Workspace)
 	}
+
+	_, err := os.Stat(sonarConfigFile)
 
 	if os.IsNotExist(err) || !p.Config.UseSonarConfigFile {
 		// If the configuration file does not exist, use the default parameters
