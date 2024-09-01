@@ -513,7 +513,7 @@ func (p Plugin) Exec() error {
 		// Configuration file exists, let sonar-scanner use it without additional parameters
 		fmt.Println("Configuration file found. Using sonar-project.properties.")
 
-		if len(p.Config.Host) >= 1 && p.Config.UseSonarConfigFileOverride {
+		if len(p.Config.Host) >= 1 {
 			fmt.Println("OVERRIDING sonar.host.url=" + p.Config.Host)
 			args = append(args, "-Dsonar.host.url="+p.Config.Host)
 		}
