@@ -47,49 +47,52 @@ const (
 
 type (
 	Config struct {
-		Key                       string
-		Name                      string
-		Host                      string
-		Token                     string
-		Version                   string
-		Branch                    string
-		Sources                   string
-		Timeout                   string
-		Inclusions                string
-		Exclusions                string
-		Level                     string
-		ShowProfiling             string
-		BranchAnalysis            bool
-		UsingProperties           bool
-		Binaries                  string
-		Quality                   string
-		QualityEnabled            string
-		QualityTimeout            string
-		ArtifactFile              string
-		JavascitptIcovReport      string
-		JavaCoveragePlugin        string
-		JacocoReportPath          string
-		SSLKeyStorePassword       string
-		CacertsLocation           string
-		JunitReportPaths          string
-		SourceEncoding            string
-		SonarTests                string
-		JavaTest                  string
-		PRKey                     string
-		PRBranch                  string
-		PRBase                    string
-		CoverageExclusion         string
-		JavaSource                string
-		JavaLibraries             string
-		SurefireReportsPath       string
-		TypescriptLcovReportPaths string
-		Verbose                   string
-		CustomJvmParams           string
-		TaskId                    string
-		SkipScan                  bool
-		WaitQualityGate           bool
-		Workspace                 string
-		SonarOPS                  string
+		Key                        string
+		Name                       string
+		Host                       string
+		Token                      string
+		Version                    string
+		Branch                     string
+		Sources                    string
+		Timeout                    string
+		Inclusions                 string
+		Exclusions                 string
+		Level                      string
+		ShowProfiling              string
+		BranchAnalysis             bool
+		UsingProperties            bool
+		Binaries                   string
+		Quality                    string
+		QualityEnabled             string
+		QualityTimeout             string
+		ArtifactFile               string
+		JavascitptIcovReport       string
+		JavaCoveragePlugin         string
+		JacocoReportPath           string
+		SSLKeyStorePassword        string
+		CacertsLocation            string
+		JunitReportPaths           string
+		SourceEncoding             string
+		SonarTests                 string
+		JavaTest                   string
+		PRKey                      string
+		PRBranch                   string
+		PRBase                     string
+		CoverageExclusion          string
+		JavaSource                 string
+		JavaLibraries              string
+		SurefireReportsPath        string
+		TypescriptLcovReportPaths  string
+		Verbose                    string
+		CustomJvmParams            string
+		TaskId                     string
+		SkipScan                   bool
+		WaitQualityGate            bool
+		Workspace                  string
+		SonarOPS                   string
+		UseSonarConfigFile         bool
+		UseSonarConfigFileOverride bool
+		QualityGateErrorExitCode   int
 	}
 	Output struct {
 		OutputFile string // File where plugin output are saved
@@ -418,7 +421,8 @@ func (p Plugin) Exec() error {
 	_, err := os.Stat(sonarConfigFile)
 
 	args := []string{}
-	if os.IsNotExist(err) {
+
+	if os.IsNotExist(err) && p.Config.UseSonarConfigFile {
 		// If the configuration file does not exist, use the default parameters
 		fmt.Println("Configuration file not found. Using default parameters.")
 		args = []string{
@@ -494,6 +498,22 @@ func (p Plugin) Exec() error {
 	} else if err == nil {
 		// Configuration file exists, let sonar-scanner use it without additional parameters
 		fmt.Println("Configuration file found. Using sonar-project.properties.")
+
+		if len(p.Config.Host) >= 1 && p.Config.UseSonarConfigFileOverride {
+			fmt.Println("OVERRIDING sonar.host.url=" + p.Config.Host)
+			args = append(args, "-Dsonar.host.url="+p.Config.Host)
+		}
+
+		if len(p.Config.Token) >= 1 && p.Config.UseSonarConfigFileOverride {
+			fmt.Println("OVERRIDING sonar.login=" + p.Config.Token)
+			args = append(args, "-Dsonar.login="+p.Config.Token)
+		}
+
+		if len(p.Config.Token) >= 1 && p.Config.UseSonarConfigFileOverride {
+			fmt.Println("OVERRIDING sonar.login=" + p.Config.Token)
+			args = append(args, "-Dsonar.projectKey="+p.Config.Key)
+		}
+
 	} else {
 		// Error checking the file
 		return fmt.Errorf("error checking configuration file: %v", err)
@@ -600,7 +620,7 @@ func (p Plugin) Exec() error {
 		logrus.WithFields(logrus.Fields{
 			"status": status,
 		}).Fatal("QualityGate status failed")
-		
+
 	}
 	if status != p.Config.Quality && p.Config.QualityEnabled == "false" {
 		logrus.WithFields(logrus.Fields{

@@ -19,17 +19,37 @@ steps:
     when:
       ref:
         - "refs/pull/**" # Only run for pull requests
-  - name: publish-2.4.1
+  - name: publish-2.4.2
     image: plugins/docker:20
     settings:
       # auto_tag: true
       # auto_tag_suffix: v2.0.2-java17
       tags:
-        - v2.4.1
-        # - latest
-        # - stable-java17
+        - v2.4.2
+        - latest
+        - stable-java17
       daemon_off: false
       dockerfile: Dockerfile
+      password:
+        from_secret: docker_password
+      repo: plugins/sonarqube-scanner
+      username:
+        from_secret: docker_username
+    when:
+      ref:
+        - refs/heads/main
+        - refs/tags/**
+  - name: publish-2.4.2-java11
+    image: plugins/docker:20
+    settings:
+      # auto_tag: true
+      # auto_tag_suffix: v2.0.2-java17
+      tags:
+        - v2.4.2
+        - latest-java11
+        - stable-java11
+      daemon_off: false
+      dockerfile: Dockerfile_Deprecated
       password:
         from_secret: docker_password
       repo: plugins/sonarqube-scanner

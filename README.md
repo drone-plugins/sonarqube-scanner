@@ -1,7 +1,26 @@
-
 # Harness Drone/CIE SonarQube Plugin with Quality Gate
 
-This plugin is designed to run SonarQube scans and handle the results and convert it to JUnit Format. It's written in Go and check the report results for status OK.
+This plugin is designed to run SonarQube scans, handle the results, and convert them to JUnit format. It's written in Go and checks the report results for status OK.
+
+## Main Features - v2.4.2
+
+- **New Parameter: `sonar_config_file`**
+  - **Type**: Boolean
+  - **Description**: If set to true, the plugin will utilize the specified `sonar-project.properties` file for the SonarQube analysis, if it exists.
+  - **Environment Variable**: `PLUGIN_SONAR_CONFIG_FILE`
+  - **Allowed Values**: `"true"`, `"false"`
+
+- **New Parameter: `sonar_config_file_override`**
+  - **Type**: Boolean
+  - **Description**: If set to true, the plugin will use the `sonar-project.properties` file and allow overriding of host, login, and/or project key settings.
+  - **Environment Variable**: `PLUGIN_SONAR_CONFIG_FILE_OVERRIDE`
+  - **Allowed Values**: `"true"`, `"false"`
+
+- **New Parameter: `quality_gate_error_exit_code`**
+  - **Type**: Integer
+  - **Description**: Specifies the "exit code" error when the quality gate fails. Default is `5`.
+  - **Environment Variable**: `PLUGIN_QUALITY_GATE_ERROR_EXIT_CODE`
+  - **Default Value**: `5`
 
 ## Main Features - v2.4.1
 
@@ -9,13 +28,14 @@ This plugin is designed to run SonarQube scans and handle the results and conver
 - Execute SonarQube scans and handle the results
 - Generate JUnit reports based on the scan results
 - Quality Gate status reporting + Metrics
-- Skip Scan and only check for quality Gate Status of a specific analysisId or last analysis
-- Waiting for Analysis and QualityGate nows skip the wait if set to false - thanks @kangguru
-- Added SONAR_SCANNER_OPTS as param, so it transform into this env var during execution for Sonar JVM params - check for the param detail section below
+- Skip Scan and only check for Quality Gate status of a specific `analysisId` or last analysis
+- Waiting for Analysis and QualityGate now skips the wait if set to false - thanks @kangguru
+- Added `SONAR_SCANNER_OPTS` as a parameter, transforming into this env var during execution for Sonar JVM params - check the parameter detail section below
 
-Obs: USe branch and pr_key params for accuracy results matches when skiping the scan
+**Note**: Use `branch` and `pr_key` parameters for accurate results matching when skipping the scan.
 
-<img src="https://github.com/drone-plugins/sonarqube-scanner/blob/main/sonar-result-v2.png" alt="Results" width="800"/>
+![Results](https://github.com/drone-plugins/sonarqube-scanner/blob/main/sonar-result-v2.png)
+
 
 ### Simple Pipeline example
 
@@ -26,7 +46,7 @@ Obs: USe branch and pr_key params for accuracy results matches when skiping the 
     identifier: run_sonar
     spec:
         connectorRef: account.DockerHubDiego
-        image: plugins/sonarqube-scanner:v2.4.1
+        image: plugins/sonarqube-scanner:v2.4.2
         reports:
             type: JUnit
             spec:
@@ -48,7 +68,7 @@ Obs: USe branch and pr_key params for accuracy results matches when skiping the 
 type: Plugin
 spec:
     connectorRef: <+input>
-    image: plugins/sonarqube-scanner:v2.4.1
+    image: plugins/sonarqube-scanner:v2.4.2
     reports:
         type: JUnit
         spec:
@@ -88,7 +108,7 @@ spec:
     identifier: check_sonar
     spec:
         connectorRef: account.DockerHubDiego
-        image: plugins/sonarqube-scanner:v2.4.1
+        image: plugins/sonarqube-scanner:v2.4.2
         reports:
             type: JUnit
             spec:
@@ -110,7 +130,7 @@ name: default
 
 steps:
 - name: perform-code-analysis
-  image: plugins/sonarqube-scanner:v2.4.1
+  image: plugins/sonarqube-scanner:v2.4.2
   settings:
     sonar_host: http://34.100.11.50
     sonar_token:
@@ -211,6 +231,24 @@ steps:
   - Example: `"skip_scan": true`
 - `SONAR_SCANNER_OPTS`: pass any Sonar JVM param as env var during execution.
   - Example: `"SONAR_SCANNER_OPTS": "--add-opens java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED"`
+
+- **`sonar_config_file`**:
+  - **Type**: Boolean
+  - **Description**: Use `sonar-project.properties` if available.
+  - **Environment Variable**: `PLUGIN_SONAR_CONFIG_FILE`
+  - **Allowed Values**: `"true"`, `"false"`
+
+- **`sonar_config_file_override`**:
+  - **Type**: Boolean
+  - **Description**: Use `sonar-project.properties` if available and allow overriding of host, login, and/or project key settings.
+  - **Environment Variable**: `PLUGIN_SONAR_CONFIG_FILE_OVERRIDE`
+  - **Allowed Values**: `"true"`, `"false"`
+
+- **`quality_gate_error_exit_code`**:
+  - **Type**: Integer
+  - **Description**: Specifies the "exit code" error when the quality gate fails. Default is `5`.
+  - **Environment Variable**: `PLUGIN_QUALITY_GATE_ERROR_EXIT_CODE`
+  - **Default Value**: `5` 
 
 Detail Informations/tutorials Parameteres: [DOCS.md](DOCS.md).
 
