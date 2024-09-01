@@ -272,12 +272,12 @@ func main() {
 			Usage:  "sonar scanner jvm ops",
 			EnvVar: "PLUGIN_SONAR_SCANNER_OPTS",
 		},
-		cli.BoolTFlag{
+		cli.BoolFlag{
 			Name:   "sonar_config_file",
 			Usage:  "Use sonar-project.properties if available",
 			EnvVar: "PLUGIN_SONAR_CONFIG_FILE",
 		},
-		cli.BoolTFlag{
+		cli.BoolFlag{
 			Name:   "sonar_config_file_override",
 			Usage:  "Use sonar-project.properties if available and override host, login or/and project key",
 			EnvVar: "PLUGIN_SONAR_CONFIG_FILE_OVERRIDE",
