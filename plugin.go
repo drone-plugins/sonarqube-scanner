@@ -514,6 +514,10 @@ func (p Plugin) Exec() error {
 			args = append(args, "-Dsonar.projectKey="+p.Config.Key)
 		}
 
+		if len(p.Config.Workspace) >= 1 {
+			args = append(args, "-Dsonar.projectBaseDir="+p.Config.Workspace)
+		}
+
 	} else {
 		// Error checking the file
 		return fmt.Errorf("error checking configuration file: %v", err)
