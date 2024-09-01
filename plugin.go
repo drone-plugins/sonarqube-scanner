@@ -505,9 +505,14 @@ func (p Plugin) Exec() error {
 			args = append(args, "-Dsonar.host.url="+p.Config.Host)
 		}
 
-		if len(p.Config.Token) >= 1 && p.Config.UseSonarConfigFileOverride {
+		if len(p.Config.Token) >= 1 {
 			fmt.Println("OVERRIDING sonar.login=" + p.Config.Token)
 			args = append(args, "-Dsonar.login="+p.Config.Token)
+		} else {
+			fmt.Println("sonar_token param is also mandatory when using sonar-project.properties.")
+			fmt.Println("Exiting with status 2")
+			os.Exit(2)
+
 		}
 
 		if len(p.Config.Key) >= 1 && p.Config.UseSonarConfigFileOverride {

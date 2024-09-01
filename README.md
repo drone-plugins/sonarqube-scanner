@@ -6,7 +6,7 @@ This plugin is designed to run SonarQube scans, handle the results, and convert 
 
 - **New Parameter: `sonar_config_file`**
   - **Type**: Boolean
-  - **Description**: If set to true, the plugin will utilize the specified `sonar-project.properties` file for the SonarQube analysis, if it exists.
+  - **Description**: If set to true, the plugin will utilize the specified `sonar-project.properties` file for the SonarQube analysis, if it exists. sonar_token param still mandatory.
   - **Environment Variable**: `PLUGIN_SONAR_CONFIG_FILE`
   - **Allowed Values**: `"true"`, `"false"`
 
