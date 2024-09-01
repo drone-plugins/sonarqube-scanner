@@ -431,7 +431,7 @@ func (p Plugin) Exec() error {
 		args = append(args, "-Dsonar.projectBaseDir="+p.Config.Workspace)
 	}
 
-	if os.IsNotExist(err) && p.Config.UseSonarConfigFile {
+	if os.IsNotExist(err) || !p.Config.UseSonarConfigFile {
 		// If the configuration file does not exist, use the default parameters
 		fmt.Println("Configuration file not found. Using default parameters.")
 		args = []string{
