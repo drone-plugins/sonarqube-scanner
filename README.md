@@ -12,7 +12,7 @@ This plugin is designed to run SonarQube scans, handle the results, and convert 
 
 - **New Parameter: `sonar_config_file_override`**
   - **Type**: Boolean
-  - **Description**: If set to true, the plugin will use the `sonar-project.properties` file and allow overriding of host, login, and/or project key settings.
+  - **Description**: If set to true, the plugin will use the `sonar-project.properties` file and allow overriding of project key setting.
   - **Environment Variable**: `PLUGIN_SONAR_CONFIG_FILE_OVERRIDE`
   - **Allowed Values**: `"true"`, `"false"`
 
@@ -21,6 +21,28 @@ This plugin is designed to run SonarQube scans, handle the results, and convert 
   - **Description**: Specifies the "exit code" error when the quality gate fails. Default is `5`.
   - **Environment Variable**: `PLUGIN_QUALITY_GATE_ERROR_EXIT_CODE`
   - **Default Value**: `5`
+
+### Example
+
+```yaml
+- step:
+    type: Plugin
+    name: "Sonar Scan"
+    identifier: run_sonar
+    spec:
+        connectorRef: account.DockerHubDiego
+        image: plugins/sonarqube-scanner:v2.4.2
+        reports:
+            type: JUnit
+            spec:
+                paths:
+                  - "sonarResults.xml"
+        privileged: false
+        settings:
+            sonar_host: https://mysonar.com
+            sonar_token: <+secrets.getValue("sonar_diego")>
+            sonar_config_file: "true"
+```
 
 ## Main Features - v2.4.1
 
