@@ -434,10 +434,22 @@ func (p Plugin) Exec() error {
 
 	if os.IsNotExist(err) || !p.Config.UseSonarConfigFile {
 		// If the configuration file does not exist, use the default parameters
-		fmt.Println("Configuration file not found. Using default parameters.")
+		fmt.Println("Configuration file not found or sonar_config_file not set to true. Using plugin's parameters.")
 		args = []string{
 			"-Dsonar.host.url=" + p.Config.Host,
 			"-Dsonar.login=" + p.Config.Token,
+		}
+
+		if len(p.Config.Host) < 1 || len(p.Config.Token) < 1 {
+			fmt.Println("sonar_token and sonar_host params are mandatory.")
+			fmt.Println("Exiting with status 2")
+			os.Exit(2)
+		}
+
+		if len(p.Config.Key) < 1 {
+			fmt.Println("sonar_key (prject key) param is mandatory.")
+			fmt.Println("Exiting with status 2")
+			os.Exit(2)
 		}
 
 		// Map of potential configurations
