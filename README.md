@@ -175,8 +175,8 @@ steps:
   - Example: `"host": "https://sonarqube.example.com"`
 - `token`: The token for authenticating with the SonarQube server.
   - Example: `"token": "your-sonarqube-token"`
-- `ver`: The version of the project.
-  - Example: `"ver": "1.0.0"`
+- `build_number`: The version of the project.
+  - Example: `"build_number": "1.0.0"`
 - `workspace`: The workspace folder that will be passed to SonarQube CLI in case you are not cloning or scaning the /harness folder directly.
   - Example: `"workspace": "/harness/subfolder"`
 - `branch`: The branch of the project. This parameter is used to specify the branch of your codebase that the results should be matched with. If you're working on multiple branches, it's important to specify the correct branch to ensure that you're looking at the correct set of results.
