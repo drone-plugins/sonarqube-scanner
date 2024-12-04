@@ -38,6 +38,16 @@ func main() {
 			EnvVar: "PLUGIN_SONAR_TOKEN",
 		},
 		cli.StringFlag{
+			Name:   "organization",
+			Usage:  "SonarQube Organization",
+			EnvVar: "PLUGIN_SONAR_ORGANIZATION",
+		},
+		cli.StringFlag{
+			Name:   "scmDisabled",
+			Usage:  "SonarQube SCM Disabled",
+			EnvVar: "PLUGIN_SCM_DISABLED",
+		},
+		cli.StringFlag{
 			Name:   "ver",
 			Usage:  "Project version",
 			EnvVar: "PLUGIN_BUILD_NUMBER",
@@ -298,6 +308,8 @@ func run(c *cli.Context) {
 			Name:                       c.String("name"),
 			Host:                       c.String("host"),
 			Token:                      c.String("token"),
+			Organization:               c.String("organization"),
+			SCMDisabled:                c.Bool("scmDisabled"),
 			Version:                    c.String("ver"),
 			Branch:                     c.String("branch"),
 			Timeout:                    c.String("timeout"),

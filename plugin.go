@@ -51,6 +51,8 @@ type (
 		Name                       string
 		Host                       string
 		Token                      string
+		Organization               string
+		SCMDisabled                bool
 		Version                    string
 		Branch                     string
 		Sources                    string
@@ -456,6 +458,8 @@ func (p Plugin) Exec() error {
 		configurations := map[string]string{
 			"-Dsonar.projectKey":                     p.Config.Key,
 			"-Dsonar.projectName":                    p.Config.Name,
+			"-Dsonar.organization":                   p.Config.Organization,
+			"-Dsonar.scm.disabled":                   strconv.FormatBool(p.Config.SCMDisabled),
 			"-Dsonar.projectVersion":                 p.Config.Version,
 			"-Dsonar.sources":                        p.Config.Sources,
 			"-Dsonar.ws.timeout":                     p.Config.Timeout,
