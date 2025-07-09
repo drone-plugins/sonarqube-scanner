@@ -10,7 +10,7 @@ pool:
 
 steps:
   - name: pr test java
-    image: plugins/docker:20
+    image: plugins/docker:21
     settings:
       daemon_off: false
       dockerfile: Dockerfile
@@ -20,7 +20,7 @@ steps:
       ref:
         - "refs/pull/**" # Only run for pull requests
   - name: publish-2.4.2
-    image: plugins/docker:20
+    image: plugins/docker:21
     settings:
       # auto_tag: true
       # auto_tag_suffix: v2.0.2-java17
@@ -40,7 +40,7 @@ steps:
         - refs/heads/main
         - refs/tags/**
   - name: publish-2.4.2-java11
-    image: plugins/docker:20
+    image: plugins/docker:21
     settings:
       # auto_tag: true
       # auto_tag_suffix: v2.0.2-java17
