@@ -21,7 +21,8 @@ case "$architecture" in
     arm64) machine='AArch64' ;;
     *) echo "Unsupported smoke-test architecture: $architecture" >&2; exit 1 ;;
 esac
-docker run --rm --entrypoint readelf "$image" -h /bin/harness-sonar | grep "Machine:.*$machine"
+elf_header=$(docker run --rm --entrypoint readelf "$image" -h /bin/harness-sonar)
+printf '%s\n' "$elf_header" | grep "Machine:.*$machine"
 docker run --rm --entrypoint node "$image" --version
 docker run --rm --entrypoint /bin/harness-sonar "$image" --help
 docker run --rm --entrypoint sonar-scanner "$image" --version
