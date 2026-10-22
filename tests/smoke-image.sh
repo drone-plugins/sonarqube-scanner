@@ -10,7 +10,18 @@ docker run --rm --entrypoint php "$image" -r '
     }
     echo PHP_VERSION, "\n";
 '
-docker run --rm --entrypoint java "$image" -version
+java_version=$(docker run --rm --entrypoint java "$image" -version 2>&1)
+printf '%s\n' "$java_version"
+printf '%s\n' "$java_version" | grep 'version "17[.]'
+
+# Emulation can hide a mismatched Go binary, so inspect its ELF target as well.
+architecture=$(docker image inspect --format '{{.Architecture}}' "$image")
+case "$architecture" in
+    amd64) machine='Advanced Micro Devices X86-64' ;;
+    arm64) machine='AArch64' ;;
+    *) echo "Unsupported smoke-test architecture: $architecture" >&2; exit 1 ;;
+esac
+docker run --rm --entrypoint readelf "$image" -h /bin/harness-sonar | grep "Machine:.*$machine"
 docker run --rm --entrypoint node "$image" --version
 docker run --rm --entrypoint /bin/harness-sonar "$image" --help
 docker run --rm --entrypoint sonar-scanner "$image" --version

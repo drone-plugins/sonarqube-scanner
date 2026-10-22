@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Run Go tests using the builder toolchain
-        run: docker run --rm -v "$PWD:/src" -w /src golang:1.21-alpine go test -mod=readonly ./...
+        run: docker run --rm -v "$PWD:/src" -w /src golang:1.26-alpine go test -mod=readonly ./...
       - name: Build the image without upgrading module dependencies
         run: docker build --pull -t sonarqube-scanner:test .
       - name: Verify PHP, Java, Node and scanner compatibility

@@ -1,5 +1,5 @@
 # BuildKit cross-compiles natively; older builders retain the existing amd64 target.
-FROM --platform=${BUILDPLATFORM:-linux/amd64} golang:1.21-alpine AS build
+FROM --platform=${BUILDPLATFORM:-linux/amd64} golang:1.26-alpine AS build
 ARG TARGETOS
 ARG TARGETARCH
 RUN apk add --no-cache --update git
@@ -12,7 +12,7 @@ RUN GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH:-amd64} CGO_ENABLED=0 go build -
 
 FROM amazoncorretto:17-alpine3.22
 
-ARG SONAR_VERSION=5.0.1.3006
+ARG SONAR_VERSION=5.0.2.4997
 ARG SONAR_SCANNER_CLI=sonar-scanner-cli-${SONAR_VERSION}
 ARG SONAR_SCANNER=sonar-scanner-${SONAR_VERSION}
 
@@ -27,7 +27,7 @@ RUN apk --no-cache --update add nodejs-current npm curl unzip git 'php82>=8.2.35
 COPY --from=build /go/src/github.com/diegopereiraeng/harness-cie-sonarqube-scanner/harness-sonar /bin/
 WORKDIR /bin
 
-RUN curl https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/${SONAR_SCANNER_CLI}.zip -so /bin/${SONAR_SCANNER_CLI}.zip
+RUN curl --fail --show-error --location https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/${SONAR_SCANNER_CLI}.zip -so /bin/${SONAR_SCANNER_CLI}.zip
 RUN unzip ${SONAR_SCANNER_CLI}.zip \
     && rm ${SONAR_SCANNER_CLI}.zip 
 
