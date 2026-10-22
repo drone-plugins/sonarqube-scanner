@@ -33,7 +33,7 @@ raw scan instead of suppressing it globally. Reassess it before any Windows buil
 or dependency changes.
 
 The exact 5.0.2 image scan still reports **CVE-2021-0341 (HIGH)** for shaded
-OkHttp 3.14.9. The [upstream maintainer's assessment](https://github.com/square/okhttp/issues/6724#issuecomment-867063478)
+OkHttp 3.14.9. The [upstream maintainer's assessment](https://github.com/square/okhttp/issues/6724)
 says the normal client path guards non-ASCII input before the affected verifier;
 exposure depends on direct verifier use. Inspection of the bundled scanner JAR
 found references only in OkHttpClient.Builder, RealConnection and the verifier
