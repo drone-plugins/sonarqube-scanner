@@ -12,7 +12,7 @@ retain the existing Linux/amd64 target.
 
 SonarScanner stays on the 5.0 release branch. The default is
 [5.0.2.4997](https://github.com/SonarSource/sonar-scanner-cli/releases/tag/5.0.2.4997),
-which updates its OkHttp/Okio libraries. This avoids a scanner major-version or
+which updates its OkHttp/Okio libraries and resolves the old Okio finding. This avoids a scanner major-version or
 Java-major migration. Existing `SONAR_VERSION` build overrides still work and
 must be assessed and scanned separately when used.
 
@@ -31,6 +31,16 @@ module in the binary's dependency metadata. The affected function is
 and excludes `x/sys/windows`. Record this platform-specific disposition with the
 raw scan instead of suppressing it globally. Reassess it before any Windows build
 or dependency changes.
+
+The exact 5.0.2 image scan still reports **CVE-2021-0341 (HIGH)** for shaded
+OkHttp 3.14.9. The [upstream maintainer's assessment](https://github.com/square/okhttp/issues/6724#issuecomment-867063478)
+says the normal client path guards non-ASCII input before the affected verifier;
+exposure depends on direct verifier use. Inspection of the bundled scanner JAR
+found references only in OkHttpClient.Builder, RealConnection and the verifier
+itself. This supports further reachability review, but does not constitute a
+Security-approved clearance. Keep this finding open for Security disposition or
+a validated upstream scanner/library upgrade before publication. Do not replace
+shaded JAR classes or suppress the alert to obtain a clean scan.
 
 Before publication, also run a real analysis against the supported SonarQube
 server versions, scan the exact release digest and follow the normal tag/fleet
