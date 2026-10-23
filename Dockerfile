@@ -20,6 +20,20 @@ RUN go get github.com/joho/godotenv
 RUN GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o harness-sonar
 
 FROM amazoncorretto:17.0.11-alpine3.19
+COPY --from=hhi-ca-certificates /etc/ssl/certs/ca-certificates.crt /etc/hhi/certs/ca-certificates.crt
+ENV SSL_CERT_FILE=/etc/hhi/certs/ca-certificates.crt SSL_CERT_DIR=/etc/hhi/certs
+
+# Java and the scanner use the same patched roots as the Go wrapper.
+RUN awk 'BEGIN {n=0} /-----BEGIN CERTIFICATE-----/ {n++; file="/tmp/hhi-root-" n ".crt"} file {print > file} /-----END CERTIFICATE-----/ {close(file); file=""}' /etc/hhi/certs/ca-certificates.crt \
+    && for cert in /tmp/hhi-root-*.crt; do \
+        keytool -importcert -trustcacerts -noprompt -alias "$(basename "$cert" .crt)" \
+            -file "$cert" -keystore /etc/hhi/cacerts -storepass changeit || exit 1; \
+    done \
+    && rm /tmp/hhi-root-*.crt
+ENV JAVA_TOOL_OPTIONS="-Djavax.net.ssl.trustStore=/etc/hhi/cacerts -Djavax.net.ssl.trustStorePassword=changeit"
+
+
+ENV REQUESTS_CA_BUNDLE=/etc/hhi/certs/ca-certificates.crt PIP_CERT=/etc/hhi/certs/ca-certificates.crt CURL_CA_BUNDLE=/etc/hhi/certs/ca-certificates.crt
 
 ARG SONAR_VERSION=5.0.1.3006
 ARG SONAR_SCANNER_CLI=sonar-scanner-cli-${SONAR_VERSION}
