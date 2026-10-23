@@ -1,4 +1,10 @@
-FROM golang:1.21-alpine as build
+FROM harness0.harness.io/oci/docker_artifacts/hhi/harnessos-alpine:1 AS hhi-ca-certificates
+RUN apk add --no-cache 'ca-certificates>=20261020-r0'
+
+FROM harness0.harness.io/oci/docker_artifacts/hhi/go:1.26.10 AS hhi-go-toolchain-0
+FROM harness0.harness.io/oci/docker_artifacts/hhi/harnessos-alpine:1 AS build
+COPY --from=hhi-go-toolchain-0 /usr/lib/go /usr/lib/go
+ENV PATH=/usr/lib/go/bin:$PATH GOPATH=/go GOTOOLCHAIN=local
 RUN apk add --no-cache --update git
 RUN mkdir -p /go/src/github.com/diegopereiraeng/harness-cie-sonarqube-scanner
 WORKDIR /go/src/github.com/diegopereiraeng/harness-cie-sonarqube-scanner 
@@ -35,3 +41,6 @@ RUN unzip ${SONAR_SCANNER_CLI}.zip \
 ENV PATH $PATH:/bin/${SONAR_SCANNER}/bin
 
 ENTRYPOINT /bin/harness-sonar
+
+# Supply the incident-patched system roots from the HHI package.
+COPY --from=hhi-ca-certificates /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
