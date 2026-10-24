@@ -19,7 +19,7 @@ must be assessed and scanned separately when used.
 Build and check the final image:
 
 ```sh
-docker build --pull -t sonarqube-scanner:test .
+docker build --pull --no-cache -t sonarqube-scanner:test .
 sh tests/smoke-image.sh sonarqube-scanner:test
 trivy image --scanners vuln sonarqube-scanner:test
 ```
@@ -56,3 +56,8 @@ PHP-FPM or Apache. PHP's [October 23 session-upload-progress advisory](https://w
 also requires configuration review wherever PHP is used to serve HTTP requests.
 The PHP patch floor above does not establish that separate service-level review
 or the hosted-image rollout tracked in CI-25471.
+
+All base indexes are pinned to verified existing multi-platform digests. The final
+image uses the available patched Node 22.23.4 package and OpenSSL system roots,
+plus pip 26.2.2 and certifi 2026.10.19. Java remains the patched Corretto 17.0.21
+release on the original Java 17 branch. Fresh validation uses `--pull --no-cache`.

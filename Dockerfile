@@ -1,8 +1,8 @@
-FROM harness0.harness.io/oci/docker_artifacts/hhi/harnessos-alpine:1 AS hhi-ca-certificates
+FROM harness0.harness.io/oci/docker_artifacts/hhi/harnessos-alpine:1@sha256:290a37c85b4284d2c11fa0778e5da79643d912a1f5a57d6f701b77644503b7e7 AS hhi-ca-certificates
 RUN apk add --no-cache 'ca-certificates>=20261020-r0'
 
-FROM --platform=${BUILDPLATFORM:-linux/amd64} harness0.harness.io/oci/docker_artifacts/hhi/go:1.26.10 AS hhi-go-toolchain-0
-FROM --platform=${BUILDPLATFORM:-linux/amd64} harness0.harness.io/oci/docker_artifacts/hhi/harnessos-alpine:1 AS build
+FROM --platform=${BUILDPLATFORM:-linux/amd64} harness0.harness.io/oci/docker_artifacts/hhi/go:1.26.10@sha256:718fddf012b3a305e936ae9964e5a642036bcb7b4c6c0786e2f78f238d637db8 AS hhi-go-toolchain-0
+FROM --platform=${BUILDPLATFORM:-linux/amd64} harness0.harness.io/oci/docker_artifacts/hhi/harnessos-alpine:1@sha256:290a37c85b4284d2c11fa0778e5da79643d912a1f5a57d6f701b77644503b7e7 AS build
 ARG TARGETOS
 ARG TARGETARCH
 COPY --from=hhi-go-toolchain-0 /usr/lib/go /usr/lib/go
@@ -15,7 +15,7 @@ RUN go mod download
 COPY *.go ./
 RUN GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH:-amd64} CGO_ENABLED=0 go build -mod=readonly -o harness-sonar
 
-FROM amazoncorretto:17-alpine3.22
+FROM amazoncorretto:17-alpine3.22@sha256:a5858cc0468afe691d84dbb2577606fce1f0c29acb267f7e7385737ce6b87409
 COPY --from=hhi-ca-certificates /etc/ssl/certs/ca-certificates.crt /etc/hhi/certs/ca-certificates.crt
 ENV SSL_CERT_FILE=/etc/hhi/certs/ca-certificates.crt SSL_CERT_DIR=/etc/hhi/certs
 
@@ -29,6 +29,7 @@ RUN awk 'BEGIN {n=0} /-----BEGIN CERTIFICATE-----/ {n++; file="/tmp/hhi-root-" n
 ENV JAVA_TOOL_OPTIONS="-Djavax.net.ssl.trustStore=/etc/hhi/cacerts -Djavax.net.ssl.trustStorePassword=changeit"
 
 
+ENV NODE_OPTIONS="--use-openssl-ca"
 ENV REQUESTS_CA_BUNDLE=/etc/hhi/certs/ca-certificates.crt PIP_CERT=/etc/hhi/certs/ca-certificates.crt CURL_CA_BUNDLE=/etc/hhi/certs/ca-certificates.crt
 
 ARG SONAR_VERSION=5.0.2.4997
@@ -39,9 +40,10 @@ ARG SONAR_SCANNER=sonar-scanner-${SONAR_VERSION}
 #     && apt-get install -y nodejs curl \
 #     && apt-get clean
 
-RUN apk --no-cache --update add nodejs-current npm curl unzip git 'php82>=8.2.35' python3 py3-pip maven gcc g++ make ruby ruby-dev perl \
+RUN apk --no-cache --update add 'nodejs>=22.23.4' npm curl unzip git 'php82>=8.2.35' python3 py3-pip maven gcc g++ make ruby ruby-dev perl \
     && ln -s /usr/bin/php82 /usr/bin/php \
-    && php -r 'exit(PHP_VERSION_ID >= 80235 && PHP_MAJOR_VERSION === 8 && PHP_MINOR_VERSION === 2 ? 0 : 1);'
+    && php -r 'exit(PHP_VERSION_ID >= 80235 && PHP_MAJOR_VERSION === 8 && PHP_MINOR_VERSION === 2 ? 0 : 1);' \
+    && python3 -m pip install --no-cache-dir --break-system-packages 'pip==26.2.2' 'certifi==2026.10.19'
 
 # PHP curl also loads the system certificate directory.
 RUN apk add --no-cache ca-certificates \
