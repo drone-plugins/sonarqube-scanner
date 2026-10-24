@@ -81,3 +81,10 @@ vendored inventory. Keep the raw findings visible for reachability review.
 No newer official pip release was available when checked on 2026-10-23 HST.
 Use a verified upstream fix or obtain Security disposition before publication;
 do not rewrite vendored metadata or replace bundled modules just to clear a scan.
+
+The separate `stable-java11` / `latest-java11` release still uses
+`Dockerfile_Deprecated`: Go 1.20, OpenJDK 11.0.16 and the distribution's older Node
+package. It does not install PHP, but it is outside the Go/Java/Node incident
+floors. It needs a tested migration that preserves the Java 11 and Debian tool
+contracts before publication can be called incident-cleared. The Java 17 fixes
+and checks in this PR do not establish mitigation for those Java 11 tags.
