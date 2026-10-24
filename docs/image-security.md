@@ -46,8 +46,19 @@ Before publication, also run a real analysis against the supported SonarQube
 server versions, scan the exact release digest and follow the normal tag/fleet
 rollout. CLI startup checks alone do not establish end-to-end server compatibility.
 
-The image also uses the incident-patched HHI roots for Go, Java, PHP and the
-system certificate bundle. The PHP/runtime and locked-module build changes
+The Go builder uses the incident-patched HHI base. The final image uses Alpine's
+native `ca-certificates` package at version 20261020-r0 or later. Java's default
+store follows the `java-cacerts` update hook; Node uses OpenSSL's system roots,
+and PHP, Requests, pip and curl use the standard system bundle. Adding a private
+CA under `/usr/local/share/ca-certificates` and running `update-ca-certificates`
+therefore updates the active stores without a separate frozen bundle.
+
+`tests/TrustStoreSmoke.java` checks the active Java default store after a private
+CA has been added in a disposable container. Pass that public CA certificate
+followed by the fourteen incident chains; it requires the private CA to be
+accepted and each incident chain to fail certificate-path validation.
+
+The PHP/runtime and locked-module build changes
 follow [PR #114](https://github.com/drone-plugins/sonarqube-scanner/pull/114).
 Review the overlapping changes together when merging these incident fixes.
 
