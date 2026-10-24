@@ -45,6 +45,11 @@ ARG SONAR_SCANNER=sonar-scanner-${SONAR_VERSION}
 
 RUN apk --no-cache --update add nodejs-current npm curl unzip git php python3 py3-pip maven gcc g++ make ruby ruby-dev perl
 
+# PHP curl also loads the system certificate directory.
+RUN sed -i -e 's|^mozilla/emSign_ECC_Root_CA_-_G3.crt|!&|' \
+    -e 's|^mozilla/Comodo_AAA_Services_root.crt|!&|' /etc/ca-certificates.conf \
+    && update-ca-certificates
+
 COPY --from=build /go/src/github.com/diegopereiraeng/harness-cie-sonarqube-scanner/harness-sonar /bin/
 WORKDIR /bin
 
