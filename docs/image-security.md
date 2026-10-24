@@ -61,3 +61,12 @@ All base indexes are pinned to verified existing multi-platform digests. The fin
 image uses the available patched Node 22.23.4 package and OpenSSL system roots,
 plus pip 26.2.2 and certifi 2026.10.19. Java remains the patched Corretto 17.0.21
 release on the original Java 17 branch. Fresh validation uses `--pull --no-cache`.
+
+The tested pip 26.2.2 wheel also reports four HIGH findings in its vendored
+dependencies: msgpack 1.1.2 (GHSA-6v7p-g79w-8964), setuptools 70.3.0
+(CVE-2025-47273), and urllib3 2.7.0 (CVE-2026-97687 and CVE-2026-97689).
+The separately installed setuptools is 80.9.0; the scanner identifies the older
+vendored inventory. Keep the raw findings visible for reachability review.
+No newer official pip release was available when checked on 2026-10-23 HST.
+Use a verified upstream fix or obtain Security disposition before publication;
+do not rewrite vendored metadata or replace bundled modules just to clear a scan.
